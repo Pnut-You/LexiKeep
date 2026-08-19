@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pnut-you.github.io/LexiKeep/sitemap.xml

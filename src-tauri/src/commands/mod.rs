@@ -1,0 +1,15 @@
+pub mod chinese;
+pub mod dictionary;
+pub mod english;
+pub mod export;
+pub mod files;
+pub mod german;
+pub mod import;
+pub mod language;
+pub mod ollama;
+pub mod phrases;
+pub mod reviews;
+pub mod stats;
+pub mod updater;
+pub mod words;
+pub mod youtube;
