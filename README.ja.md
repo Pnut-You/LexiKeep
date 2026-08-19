@@ -38,7 +38,7 @@ LexiKeep は、無料・オープンソース・オフライン優先のリー�
 
 ## ダウンロードとインストール
 
-最新の **macOS / Windows / Android** インストーラーは [Releases ページ](https://github.com/Pnut-You/LexiKeep/releases/latest) から入手できます。
+最新の **macOS / Windows / Linux / Android** インストーラーは [Releases ページ](https://github.com/Pnut-You/LexiKeep/releases/latest) から入手できます。
 
 > 現在のインストーラーは**未署名**のため、初回インストール時にシステムからセキュリティ警告が表示される場合がありますが、正常な動作です。詳しくは [DISTRIBUTION.md](DISTRIBUTION.md) をご覧ください。
 

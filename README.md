@@ -38,7 +38,7 @@ All your study data is stored in a local database on your device. Nothing is upl
 
 ## Download & install
 
-Grab the latest installer for **macOS / Windows / Android** from the [Releases page](https://github.com/Pnut-You/LexiKeep/releases/latest).
+Grab the latest installer for **macOS / Windows / Linux / Android** from the [Releases page](https://github.com/Pnut-You/LexiKeep/releases/latest).
 
 > Installers are currently **unsigned** — your system may show a security warning on first install. That's expected. See [DISTRIBUTION.md](DISTRIBUTION.md) for the platform-by-platform guide.
 

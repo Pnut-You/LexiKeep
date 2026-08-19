@@ -38,7 +38,7 @@ LexiKeep 是一款免费、开源、本地优先的阅读学习工具。导入�
 
 ## 下载与安装
 
-从 [Releases 页面](https://github.com/Pnut-You/LexiKeep/releases/latest) 下载 **macOS / Windows / Android** 安装包。
+从 [Releases 页面](https://github.com/Pnut-You/LexiKeep/releases/latest) 下载 **macOS / Windows / Linux / Android** 安装包。
 
 > 安装包目前为**未签名**构建，首次安装系统可能给出安全提示，属于正常现象。各平台处理方法见 [DISTRIBUTION.md](DISTRIBUTION.md)。
 

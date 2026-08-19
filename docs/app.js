@@ -125,6 +125,11 @@
           desc: "PC 电脑 · 安装程序",
           file: "在最新版本页选择文件名以 <span class=\"dl-tag\">-setup.exe</span> 结尾的文件。"
         },
+        linux: {
+          name: "Linux",
+          desc: "Debian / Ubuntu · DEB 安装包",
+          file: "在最新版本页选择文件名以 <span class=\"dl-tag\">_amd64.deb</span> 结尾的文件。"
+        },
         and: {
           name: "Android",
           desc: "安卓手机 · APK 安装包",
@@ -260,6 +265,11 @@
           desc: "PC · installer",
           file: "On the latest release, pick the file ending in <span class=\"dl-tag\">-setup.exe</span>."
         },
+        linux: {
+          name: "Linux",
+          desc: "Debian / Ubuntu · DEB package",
+          file: "On the latest release, pick the file ending in <span class=\"dl-tag\">_amd64.deb</span>."
+        },
         and: {
           name: "Android",
           desc: "Android phone · APK",
@@ -394,6 +404,11 @@
           name: "Windows",
           desc: "PC · インストーラー",
           file: "最新リリースから、末尾が <span class=\"dl-tag\">-setup.exe</span> のファイルを選んでください。"
+        },
+        linux: {
+          name: "Linux",
+          desc: "Debian / Ubuntu · DEB パッケージ",
+          file: "最新リリースから、末尾が <span class=\"dl-tag\">_amd64.deb</span> のファイルを選んでください。"
         },
         and: {
           name: "Android",
@@ -571,6 +586,7 @@
   if (/android/.test(ua)) detectedOs = "android";
   else if (/mac os x|macintosh/.test(ua)) detectedOs = "mac";
   else if (/windows/.test(ua)) detectedOs = "win";
+  else if (/linux/.test(ua)) detectedOs = "linux";
   if (detectedOs) {
     var detectedCard = dlOverlay.querySelector('[data-os="' + detectedOs + '"]');
     if (detectedCard) detectedCard.classList.add("recommended");

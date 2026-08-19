@@ -74,6 +74,24 @@ LexiKeep 的预编译安装包由 [GitHub Actions](.github/workflows/build-insta
 
 ---
 
+## Linux（Debian / Ubuntu）
+
+下载文件名以 `_amd64.deb` 结尾的安装包，在下载目录执行：
+
+```bash
+sudo apt install ./LexiKeep_1.0.0_amd64.deb
+```
+
+系统会自动安装 WebKitGTK 等运行依赖。安装完成后，可从应用菜单启动 LexiKeep，也可以在终端执行：
+
+```bash
+lexikeep
+```
+
+若使用 `dpkg -i` 安装后提示缺少依赖，请执行 `sudo apt-get install -f` 修复。
+
+---
+
 ## Android
 
 ### 现象
