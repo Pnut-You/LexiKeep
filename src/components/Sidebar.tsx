@@ -23,7 +23,7 @@ function NavLinkItem({ to, icon: Icon, labelKey, t }: { to: string; icon: typeof
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `w-10 sm:w-full h-10 flex flex-col sm:flex-row items-center sm:justify-start sm:gap-3 sm:px-3 justify-center rounded-xl transition-colors ${
+        `w-10 sm:w-full h-11 flex flex-col sm:flex-row items-center sm:justify-start sm:gap-3 sm:px-3 justify-center rounded-xl transition-colors ${
           isActive
             ? 'bg-blue-50 text-blue-600'
             : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
@@ -43,9 +43,9 @@ export default function Sidebar() {
   const setLanguage = usePreferencesStore((state) => state.setLanguage);
 
   return (
-    <aside className="hidden sm:flex w-16 sm:w-48 bg-white border-r border-gray-200 flex-col items-center sm:items-stretch py-4 px-2 gap-1 shrink-0">
-      <div className="mb-4 px-3 text-lg font-bold text-blue-600 select-none">
-        <span className="sm:hidden">L</span>
+    <aside className="hidden sm:flex w-16 sm:w-52 bg-white border-r border-gray-200 flex-col items-center sm:items-stretch py-5 px-2.5 gap-1.5 shrink-0">
+      <div className="mb-5 flex h-10 items-center gap-2.5 px-1.5 sm:px-2.5 text-xl font-bold tracking-tight text-gray-900 select-none" aria-label="LexiKeep">
+        <img src="/lexikeep-icon.png" alt="" className="h-9 w-9 rounded-xl shrink-0" />
         <span className="hidden sm:inline">LexiKeep</span>
       </div>
       {NAV_ITEMS.map((item) => <NavLinkItem key={item.to} {...item} t={t} />)}
