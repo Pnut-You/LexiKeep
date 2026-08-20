@@ -86,7 +86,13 @@
       "statusError": "Verbindung fehlgeschlagen. Bitte Konfiguration prüfen.",
       "statusIdle": "Verbindung noch nicht getestet",
       "disabledHint": "KI ist deaktiviert; die KI-Schaltflächen auf den Seiten „Lesen“ und „Dateien“ sind ausgeblendet. Sie können sie hier jederzeit wieder aktivieren.",
-      "custom": "Benutzerdefiniert"
+      "custom": "Benutzerdefiniert",
+      "baseUrlRequired": "Geben Sie die Basis-URL der benutzerdefinierten API ein, z. B. https://api.example.com/v1",
+      "apiKeyRequired": "Geben Sie zuerst den API-Schlüssel für den ausgewählten Cloud-Dienst ein",
+      "presetUrlHint": "Der offizielle OpenAI-kompatible Endpunkt für {{service}} wird automatisch konfiguriert.",
+      "customUrlHint": "Geben Sie für einen benutzerdefinierten Dienst die OpenAI-kompatible API-Basis-URL ein, die normalerweise auf /v1 endet.",
+      "modelPlaceholder": "Modellnamen eingeben oder auswählen",
+      "modelActiveHint": "Aktives Modell: {{model}}. Änderungen gelten sofort; keine neue Verbindung nötig."
     },
     "youtube": {
       "title": "YouTube-Untertitel-Tool",

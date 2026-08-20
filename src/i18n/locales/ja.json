@@ -85,7 +85,13 @@
       "statusError": "接続に失敗しました。設定を確認してください。",
       "statusIdle": "接続はまだテストされていません",
       "disabledHint": "AI は無効です。読書・ファイルページの AI ボタンは非表示になります。ここからいつでも再度有効にできます。",
-      "custom": "カスタム"
+      "custom": "カスタム",
+      "baseUrlRequired": "カスタム API のベース URL を入力してください（例：https://api.example.com/v1）",
+      "apiKeyRequired": "選択したクラウドサービスの API キーを入力してください",
+      "presetUrlHint": "{{service}} の公式 OpenAI 互換エンドポイントは自動設定されています。",
+      "customUrlHint": "カスタムサービスでは、通常 /v1 で終わる OpenAI 互換 API のベース URL を入力してください。",
+      "modelPlaceholder": "モデル名を入力または選択",
+      "modelActiveHint": "使用中：{{model}}。切り替えはすぐに反映され、再接続は不要です。"
     },
     "youtube": {
       "title": "YouTube 字幕ツール",

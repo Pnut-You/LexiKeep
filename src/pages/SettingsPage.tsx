@@ -7,13 +7,24 @@ import { openUrl } from '@tauri-apps/plugin-opener';
 import { useTranslation } from 'react-i18next';
 import { useFileStore } from '../stores/fileStore';
 import { useUpdateStore } from '../stores/updateStore';
-import { DEFAULT_OLLAMA_URL, OPENAI_PRESETS, useAiStore, type AiProvider } from '../stores/aiStore';
+import { useAiStore } from '../stores/aiStore';
+import {
+  DEFAULT_CLOUD_PRESET,
+  DEFAULT_OLLAMA_URL,
+  OPENAI_PRESETS,
+  findAiPresetByBaseUrl,
+  findAiPresetByKey,
+  isOllamaBaseUrl,
+  resolveAiBaseUrl,
+  type AiProvider,
+} from '../lib/aiProviders';
 import type { DictionarySource } from '../lib/types';
 import { useTheme } from '../components/useTheme';
 import { THEMES } from '../lib/themes';
 import { SELF_NAMES, UI_LANGUAGES, isLanguage } from '../lib/languages';
 import { usePreferencesStore } from '../stores/preferencesStore';
 import { formatBytes } from '../lib/format';
+import { connectAndLoadAiModels, isTauriRuntime } from '../lib/ai';
 
 interface YtDlpStatus {
   available: boolean;
@@ -99,6 +110,8 @@ export default function SettingsPage() {
   const updateDownloadUrl = useUpdateStore((state) => state.downloadUrl);
   const checkUpdate = useUpdateStore((state) => state.check);
   const installUpdate = useUpdateStore((state) => state.install);
+  const selectedCloudPreset = findAiPresetByBaseUrl(aiBaseUrl);
+  const selectedCloudPresetKey = selectedCloudPreset?.key ?? 'custom';
 
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -138,6 +151,11 @@ export default function SettingsPage() {
   };
 
   useEffect(() => {
+    if (!isTauriRuntime()) {
+      setLoading(false);
+      setStorageLoading(false);
+      return;
+    }
     void loadSources();
     void loadStorage();
     void checkYtdlp();
@@ -149,24 +167,41 @@ export default function SettingsPage() {
   const checkAi = async () => {
     setAiStatus('checking');
     setAiError('');
+    setAiModels([]);
+    if (aiProvider === 'openai' && !aiBaseUrl.trim()) {
+      setAiStatus('error');
+      setAiError(t('settings.ai.baseUrlRequired'));
+      return;
+    }
+    if (aiProvider === 'openai' && selectedCloudPreset && !aiApiKey.trim()) {
+      setAiStatus('error');
+      setAiError(t('settings.ai.apiKeyRequired'));
+      return;
+    }
     const config = {
       provider: aiProvider,
-      baseUrl: aiBaseUrl.trim() || DEFAULT_OLLAMA_URL,
+      baseUrl: resolveAiBaseUrl(aiProvider, aiBaseUrl),
       model: aiModel,
       apiKey: aiProvider === 'openai' ? aiApiKey : undefined,
     };
-    const fingerprint = JSON.stringify(config);
+    const fingerprint = JSON.stringify({
+      provider: config.provider,
+      baseUrl: config.baseUrl,
+      apiKey: config.apiKey,
+    });
     try {
-      await invoke('ai_status', { config });
+      const models = await connectAndLoadAiModels(config);
+      const names = [...new Set(models.map((item) => item.name))]
+        .sort((left, right) => left.localeCompare(right));
+      setAiModels(names);
+      let selectedModel = aiModel;
+      if (names.length > 0 && (!aiModel.trim() || !names.includes(aiModel))) {
+        const defaultModel = selectedCloudPreset?.defaultModel;
+        selectedModel = defaultModel && names.includes(defaultModel) ? defaultModel : names[0];
+        setAiModel(selectedModel);
+      }
       setAiStatus('ready');
       setAiFingerprint(fingerprint);
-      try {
-        const models = await invoke<{ name: string }[]>('ai_models', { config });
-        setAiModels(models.map((item) => item.name));
-      } catch (error) {
-        console.error('Failed to load AI model list:', error);
-        setAiModels([]);
-      }
     } catch (error) {
       console.error('Failed to connect to AI service:', error);
       setAiStatus('error');
@@ -178,22 +213,35 @@ export default function SettingsPage() {
   useEffect(() => {
     const fingerprint = JSON.stringify({
       provider: aiProvider,
-      baseUrl: aiBaseUrl.trim() || DEFAULT_OLLAMA_URL,
-      model: aiModel,
+      baseUrl: resolveAiBaseUrl(aiProvider, aiBaseUrl),
       apiKey: aiProvider === 'openai' ? aiApiKey : undefined,
     });
     if (aiStatus !== 'idle' && aiFingerprint && aiFingerprint !== fingerprint) {
       resetAiCheck();
     }
-  }, [aiProvider, aiBaseUrl, aiModel, aiApiKey, aiStatus, aiFingerprint, resetAiCheck]);
+  }, [aiProvider, aiBaseUrl, aiApiKey, aiStatus, aiFingerprint, resetAiCheck]);
 
   const switchProvider = (provider: AiProvider) => {
     setAiProvider(provider);
+    if (provider === 'ollama') {
+      selectAiBaseUrl(DEFAULT_OLLAMA_URL);
+      setAiModel('');
+    } else if (!aiBaseUrl.trim() || isOllamaBaseUrl(aiBaseUrl)) {
+      selectAiBaseUrl(DEFAULT_CLOUD_PRESET.baseUrl);
+      setAiModel(DEFAULT_CLOUD_PRESET.defaultModel ?? '');
+    }
     resetAiCheck();
   };
 
-  const selectPreset = (value: string) => {
-    selectAiBaseUrl(value === 'custom' ? '' : value);
+  const selectPreset = (key: string) => {
+    const preset = findAiPresetByKey(key);
+    if (!preset || preset.key === 'custom') {
+      selectAiBaseUrl('');
+      setAiModel('');
+    } else {
+      selectAiBaseUrl(preset.baseUrl);
+      setAiModel(preset.defaultModel ?? '');
+    }
     resetAiCheck();
   };
 
@@ -335,23 +383,29 @@ export default function SettingsPage() {
                 <div className="space-y-3">
                   <div className="grid gap-3 sm:grid-cols-[200px_1fr]">
                     <select
-                      value={OPENAI_PRESETS.some((preset) => preset.baseUrl === aiBaseUrl) ? aiBaseUrl : 'custom'}
+                      value={selectedCloudPresetKey}
                       onChange={(event) => selectPreset(event.target.value)}
                       aria-label={t('settings.ai.cloudServiceAria')}
                       className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200"
                     >
                       {OPENAI_PRESETS.map((preset) => (
-                        <option key={preset.label} value={preset.baseUrl || 'custom'}>{preset.key === 'custom' ? t('settings.ai.custom') : preset.label}</option>
+                        <option key={preset.key} value={preset.key}>{preset.key === 'custom' ? t('settings.ai.custom') : preset.label}</option>
                       ))}
                     </select>
                     <input
                       value={aiBaseUrl}
                       onChange={(event) => setAiBaseUrl(event.target.value)}
+                      readOnly={Boolean(selectedCloudPreset)}
                       placeholder="https://api.example.com/v1"
                       aria-label={t('settings.ai.cloudBaseUrlAria')}
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                      className={`rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 ${selectedCloudPreset ? 'bg-gray-50 text-gray-500' : ''}`}
                     />
                   </div>
+                  <p className="text-xs text-gray-500">
+                    {selectedCloudPreset
+                      ? t('settings.ai.presetUrlHint', { service: selectedCloudPreset.label })
+                      : t('settings.ai.customUrlHint')}
+                  </p>
                   <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
                     <div className="relative">
                       <input
@@ -388,15 +442,29 @@ export default function SettingsPage() {
                       {aiStatus === 'checking' ? t('settings.ai.connecting') : t('settings.ai.connect')}
                     </button>
                   </div>
-                  <select
-                    value={aiModel}
-                    onChange={(event) => setAiModel(event.target.value)}
-                    aria-label={t('settings.ai.cloudModelAria')}
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                  >
-                    <option value="">{t('settings.ai.selectModel')}</option>
-                    {aiModels.map((model) => <option key={model} value={model}>{model}</option>)}
-                  </select>
+                  {aiModels.length > 0 ? (
+                    <div className="space-y-1.5">
+                      <select
+                        value={aiModel}
+                        onChange={(event) => setAiModel(event.target.value)}
+                        aria-label={t('settings.ai.cloudModelAria')}
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                      >
+                        {aiModels.map((model) => <option key={model} value={model}>{model}</option>)}
+                      </select>
+                      <p className="text-xs text-green-700">
+                        {t('settings.ai.modelActiveHint', { model: aiModel })}
+                      </p>
+                    </div>
+                  ) : (
+                    <input
+                      value={aiModel}
+                      onChange={(event) => setAiModel(event.target.value)}
+                      placeholder={selectedCloudPreset?.defaultModel ?? t('settings.ai.modelPlaceholder')}
+                      aria-label={t('settings.ai.cloudModelAria')}
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                    />
+                  )}
                 </div>
               )}
 

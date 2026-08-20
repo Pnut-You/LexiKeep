@@ -1,31 +1,22 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import {
+  DEFAULT_CLOUD_PRESET,
+  DEFAULT_OLLAMA_URL,
+  OPENAI_PRESETS,
+  normalizeAiBaseUrl,
+  shouldMigrateBrokenCloudConfig,
+  type AiPreset,
+  type AiProvider,
+} from '../lib/aiProviders';
 
-export type AiProvider = 'ollama' | 'openai';
+export { DEFAULT_OLLAMA_URL, OPENAI_PRESETS };
+export type { AiPreset, AiProvider };
 
 export type AiConnectionStatus = 'idle' | 'checking' | 'ready' | 'error';
 
-export const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
-
-export interface AiPreset {
-  key?: 'custom';
-  label: string;
-  baseUrl: string;
-}
-
-export const OPENAI_PRESETS: AiPreset[] = [
-  { label: 'OpenAI', baseUrl: 'https://api.openai.com/v1' },
-  { label: 'DeepSeek', baseUrl: 'https://api.deepseek.com' },
-  { label: 'OpenCode', baseUrl: 'https://opencode.ai/zen/go/v1' },
-  { key: 'custom', label: 'Custom', baseUrl: '' },
-];
-
 const LEGACY_BASE_URL_KEY = 'lexicue.ollama.baseUrl';
 const LEGACY_MODEL_KEY = 'lexicue.ollama.model';
-
-function normalizeBaseUrl(baseUrl: string): string {
-  return baseUrl.trim().replace(/\/+$/, '');
-}
 
 interface AiState {
   enabled: boolean;
@@ -81,15 +72,22 @@ export const useAiStore = create<AiState>()(
       aiFingerprint: '',
       setEnabled: (enabled) => set({ enabled }),
       setProvider: (provider) => set({ provider }),
-      setBaseUrl: (baseUrl) => set({ baseUrl }),
+      setBaseUrl: (baseUrl) => set((state) => {
+        const currentUrl = normalizeAiBaseUrl(state.baseUrl);
+        const nextUrl = normalizeAiBaseUrl(baseUrl);
+        return {
+          baseUrl,
+          apiKey: currentUrl === nextUrl ? state.apiKey : state.apiKeys[nextUrl] ?? '',
+        };
+      }),
       setModel: (model) => set({ model }),
       setApiKey: (apiKey) => set((state) => ({
         apiKey,
-        apiKeys: { ...state.apiKeys, [normalizeBaseUrl(state.baseUrl)]: apiKey },
+        apiKeys: { ...state.apiKeys, [normalizeAiBaseUrl(state.baseUrl)]: apiKey },
       })),
       selectBaseUrl: (baseUrl) => set((state) => ({
         baseUrl,
-        apiKey: state.apiKeys[normalizeBaseUrl(baseUrl)] ?? '',
+        apiKey: state.apiKeys[normalizeAiBaseUrl(baseUrl)] ?? '',
       })),
       setAiStatus: (status) => set({ aiStatus: status }),
       setAiModels: (models) => set({ aiModels: models }),
@@ -109,13 +107,23 @@ export const useAiStore = create<AiState>()(
           localStorage.removeItem(LEGACY_BASE_URL_KEY);
           localStorage.removeItem(LEGACY_MODEL_KEY);
         }
-        const baseUrl = typeof saved.baseUrl === 'string'
+        const savedProvider: AiProvider = saved.provider === 'openai' ? 'openai' : 'ollama';
+        const initialBaseUrl = typeof saved.baseUrl === 'string'
           ? saved.baseUrl
           : legacyBaseUrl ?? DEFAULT_OLLAMA_URL;
-        const apiKey = typeof saved.apiKey === 'string' ? saved.apiKey : '';
+        const migrateBrokenCloudConfig = shouldMigrateBrokenCloudConfig(
+          savedProvider,
+          initialBaseUrl,
+        );
+        const baseUrl = migrateBrokenCloudConfig
+          ? DEFAULT_CLOUD_PRESET.baseUrl
+          : initialBaseUrl;
+        const savedApiKey = typeof saved.apiKey === 'string' ? saved.apiKey : '';
         const apiKeys = saved.apiKeys && typeof saved.apiKeys === 'object'
           ? saved.apiKeys as Record<string, string>
-          : (apiKey ? { [normalizeBaseUrl(baseUrl)]: apiKey } : {});
+          : (savedApiKey ? { [normalizeAiBaseUrl(initialBaseUrl)]: savedApiKey } : {});
+        const apiKey = apiKeys[normalizeAiBaseUrl(baseUrl)]
+          ?? (normalizeAiBaseUrl(baseUrl) === normalizeAiBaseUrl(initialBaseUrl) ? savedApiKey : '');
         const savedStatus = saved.aiStatus === 'ready' || saved.aiStatus === 'error'
           ? saved.aiStatus
           : 'idle';
@@ -123,9 +131,13 @@ export const useAiStore = create<AiState>()(
           ...current,
           ...saved,
           enabled: typeof saved.enabled === 'boolean' ? saved.enabled : hasLegacy,
-          provider: saved.provider === 'openai' ? 'openai' : 'ollama',
+          provider: savedProvider,
           baseUrl,
-          model: typeof saved.model === 'string' ? saved.model : (legacyModel ?? ''),
+          model: !migrateBrokenCloudConfig && typeof saved.model === 'string' && saved.model
+            ? saved.model
+            : (savedProvider === 'openai' && baseUrl === DEFAULT_CLOUD_PRESET.baseUrl
+              ? DEFAULT_CLOUD_PRESET.defaultModel ?? ''
+              : legacyModel ?? ''),
           apiKey,
           apiKeys,
           aiStatus: savedStatus,

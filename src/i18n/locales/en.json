@@ -86,7 +86,13 @@
       "statusError": "Connection failed. Please check your configuration.",
       "statusIdle": "Connection not tested yet",
       "disabledHint": "AI is disabled; AI buttons in the Reading and Files pages are hidden. You can re-enable it here anytime.",
-      "custom": "Custom"
+      "custom": "Custom",
+      "baseUrlRequired": "Enter the custom API base URL, for example https://api.example.com/v1",
+      "apiKeyRequired": "Enter the API key for the selected cloud service first",
+      "presetUrlHint": "The official OpenAI-compatible endpoint for {{service}} is configured automatically.",
+      "customUrlHint": "For a custom service, enter its OpenAI-compatible API base URL, usually ending in /v1.",
+      "modelPlaceholder": "Enter or select a model name",
+      "modelActiveHint": "Active model: {{model}}. Changes take effect immediately; no reconnection needed."
     },
     "youtube": {
       "title": "YouTube Subtitle Tool",

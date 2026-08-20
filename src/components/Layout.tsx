@@ -10,8 +10,10 @@ import { useYoutubeStore } from '../stores/youtubeStore';
 import { useAiStore } from '../stores/aiStore';
 import { useUpdateStore } from '../stores/updateStore';
 import { useFeedbackStore } from '../stores/feedbackStore';
+import { isTauriRuntime } from '../lib/ai';
 
 export default function Layout() {
+  const desktopRuntime = isTauriRuntime();
   const { t } = useTranslation();
   const initializeOllama = useOllamaStore((state) => state.initialize);
   const initializeDict = useDictionaryStore((state) => state.initialize);
@@ -23,12 +25,14 @@ export default function Layout() {
   const startupChecked = useRef(false);
 
   useEffect(() => {
+    if (!desktopRuntime) return;
     if (aiEnabled) void initializeOllama();
     void initializeDict();
     void initializeYoutube();
-  }, [initializeOllama, initializeDict, initializeYoutube, aiEnabled]);
+  }, [initializeOllama, initializeDict, initializeYoutube, aiEnabled, desktopRuntime]);
 
   useEffect(() => {
+    if (!desktopRuntime) return;
     if (startupChecked.current) return;
     startupChecked.current = true;
     void (async () => {
@@ -38,13 +42,13 @@ export default function Layout() {
         showFeedback(t('layout.updateAvailable', { version }), 'info', 10000);
       }
     })();
-  }, [checkUpdate, showFeedback, t]);
+  }, [checkUpdate, showFeedback, t, desktopRuntime]);
 
   return (
     <div className="h-screen flex overflow-hidden">
       <Sidebar />
       <main className="min-w-0 flex-1 overflow-hidden flex flex-col">
-        {!dictReady && (
+        {desktopRuntime && !dictReady && (
           <div className="pointer-events-none fixed right-4 top-4 z-[90] rounded border px-3 py-1.5 text-xs text-amber-600">
             {t('layout.dictInit')}
           </div>

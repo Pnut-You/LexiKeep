@@ -30,7 +30,7 @@ If any of these sound like you, LexiKeep is built for you. No account is require
 - **Smart review** — spaced repetition that nudges you right before you forget
 - **Built-in offline dictionaries** — English, Japanese, German, and Chinese, no internet needed
 - **Your data stays yours** — everything is saved locally, no account or upload required
-- **AI is optional** — paragraph explanations and translations if you want them, off by default
+- **AI is optional** — use local Ollama, Qwen, or another OpenAI-compatible API for explanations and translations; off by default
 
 ## Privacy
 

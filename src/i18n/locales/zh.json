@@ -85,7 +85,13 @@
       "statusError": "连接失败，请检查配置是否正确",
       "statusIdle": "尚未检测连接",
       "disabledHint": "AI 功能已关闭，阅读与文件页的 AI 按钮将隐藏。需要时可在此重新开启。",
-      "custom": "自定义"
+      "custom": "自定义",
+      "baseUrlRequired": "请填写自定义 API 的基础地址，例如 https://api.example.com/v1",
+      "apiKeyRequired": "请先输入所选云端服务的 API Key",
+      "presetUrlHint": "已自动配置 {{service}} 的官方 OpenAI 兼容地址，无需手动填写。",
+      "customUrlHint": "自定义服务需要填写 OpenAI 兼容 API 的基础地址，通常以 /v1 结尾。",
+      "modelPlaceholder": "输入或选择模型名称",
+      "modelActiveHint": "当前使用：{{model}}。切换后立即生效，无需再次连接。"
     },
     "youtube": {
       "title": "YouTube 字幕工具",
