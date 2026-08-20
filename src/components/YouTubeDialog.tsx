@@ -10,8 +10,9 @@ import {
 import { useFileStore } from '../stores/fileStore';
 import { useAiStore } from '../stores/aiStore';
 import { getAiConfig } from '../lib/ai';
-import { LANGUAGES, type Language } from '../lib/languages';
+import type { Language } from '../lib/languages';
 import { isCancelledError } from '../lib/errors';
+import { supportedYoutubeTracks, youtubeTrackLanguage } from '../lib/youtubeTracks';
 
 function trackLabel(track: SubtitleTrack, locale: string): string {
   const base = track.lang.split('-')[0];
@@ -19,23 +20,6 @@ function trackLabel(track: SubtitleTrack, locale: string): string {
     return new Intl.DisplayNames([locale], { type: 'language', fallback: 'code' }).of(base) ?? track.lang;
   } catch {
     return track.lang;
-  }
-}
-
-function suggestLanguage(lang: string): Language | null {
-  const base = lang.toLowerCase().split('-')[0];
-  switch (base) {
-    case 'en':
-      return 'en';
-    case 'ja':
-    case 'jp':
-      return 'ja';
-    case 'de':
-      return 'de';
-    case 'zh':
-      return 'zh';
-    default:
-      return null;
   }
 }
 
@@ -87,10 +71,8 @@ export default function YouTubeDialog({ onClose }: YouTubeDialogProps) {
     try {
       const result = await listSubs(url.trim());
       setInfo(result);
-      const first = result.manual[0] ?? result.automatic[0];
-      if (first) {
-        setLanguage(suggestLanguage(first.lang) ?? '');
-      }
+      setSelected([]);
+      setLanguage('');
       setStep('select');
     } catch (e) {
       setError(String(e));
@@ -100,12 +82,14 @@ export default function YouTubeDialog({ onClose }: YouTubeDialogProps) {
 
   const toggleTrack = (track: TrackSelection) => {
     setError('');
-    setSelected((prev) => {
-      const index = prev.findIndex((t) => t.lang === track.lang && t.is_auto === track.is_auto);
-      if (index >= 0) return prev.filter((_, i) => i !== index);
-      if (prev.length >= 2) return prev;
-      return [...prev, track];
-    });
+    const index = selected.findIndex((item) => item.lang === track.lang && item.is_auto === track.is_auto);
+    const next = index >= 0
+      ? selected.filter((_, itemIndex) => itemIndex !== index)
+      : selected.length >= 2
+        ? selected
+        : [...selected, track];
+    setSelected(next);
+    setLanguage(next[0] ? youtubeTrackLanguage(next[0].lang) ?? '' : '');
   };
 
   const isSelected = (track: TrackSelection) =>
@@ -164,13 +148,16 @@ export default function YouTubeDialog({ onClose }: YouTubeDialogProps) {
         }`}
       >
         <span className="truncate">{trackLabel(track, i18n.resolvedLanguage ?? 'zh')}</span>
-        <span className="shrink-0 text-xs text-gray-400">{track.lang}</span>
+        <span className="shrink-0 text-xs text-gray-400">
+          {track.is_auto ? t('youtube.autoShort') : t('youtube.manualShort')} · {track.lang}
+        </span>
         {selectedFlag && <Check size={15} className="shrink-0 text-blue-600" />}
       </button>
     );
   };
 
   const showAiOption = selected.length === 1 && aiEnabled;
+  const availableTracks = info ? supportedYoutubeTracks(info) : [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -232,27 +219,20 @@ export default function YouTubeDialog({ onClose }: YouTubeDialogProps) {
               <div>
                 <p className="font-medium text-gray-900">{info.title}</p>
                 <p className="mt-0.5 text-xs text-gray-500">
-                  {formatDuration(info.duration) ?? t('youtube.unknownDuration')} · {t('youtube.trackSummary', { count: info.manual.length, autoCount: info.automatic.length })}
+                  {formatDuration(info.duration) ?? t('youtube.unknownDuration')} · {t('youtube.trackSummary', { count: availableTracks.length })}
                 </p>
               </div>
 
-              {info.manual.length === 0 && info.automatic.length === 0 && (
+              {availableTracks.length === 0 && (
                 <div className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                  {t('youtube.noSubtitles')}
+                  {t('youtube.noSupportedSubtitles')}
                 </div>
               )}
 
-              {info.manual.length > 0 && (
+              {availableTracks.length > 0 && (
                 <div>
-                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">{t('youtube.manualSubtitles')}</p>
-                  <div className="grid grid-cols-2 gap-2">{info.manual.map(renderTrack)}</div>
-                </div>
-              )}
-
-              {info.automatic.length > 0 && (
-                <div>
-                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">{t('youtube.autoSubtitles')}</p>
-                  <div className="grid grid-cols-2 gap-2">{info.automatic.map(renderTrack)}</div>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">{t('youtube.chooseSubtitleLanguages')}</p>
+                  <div className="grid grid-cols-2 gap-2">{availableTracks.map(({ track }) => renderTrack(track))}</div>
                 </div>
               )}
 
@@ -262,22 +242,6 @@ export default function YouTubeDialog({ onClose }: YouTubeDialogProps) {
                     {t('youtube.selectedCount', { count: selected.length })}
                     {selected.length === 2 && t('youtube.secondAsTranslation')}
                   </p>
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700" htmlFor="youtube-language">
-                      {t('youtube.learningLanguage')}
-                    </label>
-                    <select
-                      id="youtube-language"
-                      value={language}
-                      onChange={(e) => setLanguage(e.target.value as Language)}
-                      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-                      <option value="" disabled>{t('youtube.selectLanguage')}</option>
-                      {LANGUAGES.map((item) => (
-                        <option key={item.id} value={item.id}>{item.label}</option>
-                      ))}
-                    </select>
-                  </div>
                   {showAiOption && (
                     <button
                       type="button"

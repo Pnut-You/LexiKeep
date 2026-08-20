@@ -63,11 +63,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.3
+            ## LexiKeep v1.1.4
 
-            - 支持导入带文字层的 PDF 文件
-            - YouTube 字幕工具自动使用 Linux 桌面代理
-            - 支持通过已登录浏览器的 Cookie 通过 YouTube 验证，并显示准确错误原因
+            - YouTube 字幕选择精简为中文、日语、英语和德语，并修复导入按钮禁用问题
+            - 修复文件导入后没有进入当前文件夹的问题
+            - 提高文件夹栏展开/收起箭头的可见度并调整位置
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -106,11 +106,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.3
+            ## LexiKeep v1.1.4
 
-            - 支持导入带文字层的 PDF 文件
-            - YouTube 字幕工具自动使用 Linux 桌面代理
-            - 支持通过已登录浏览器的 Cookie 通过 YouTube 验证，并显示准确错误原因
+            - YouTube 字幕选择精简为中文、日语、英语和德语，并修复导入按钮禁用问题
+            - 修复文件导入后没有进入当前文件夹的问题
+            - 提高文件夹栏展开/收起箭头的可见度并调整位置
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -154,11 +154,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.3
+            ## LexiKeep v1.1.4
 
-            - 支持导入带文字层的 PDF 文件
-            - YouTube 字幕工具自动使用 Linux 桌面代理
-            - 支持通过已登录浏览器的 Cookie 通过 YouTube 验证，并显示准确错误原因
+            - YouTube 字幕选择精简为中文、日语、英语和德语，并修复导入按钮禁用问题
+            - 修复文件导入后没有进入当前文件夹的问题
+            - 提高文件夹栏展开/收起箭头的可见度并调整位置
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -203,11 +203,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.3
+            ## LexiKeep v1.1.4
 
-            - 支持导入带文字层的 PDF 文件
-            - YouTube 字幕工具自动使用 Linux 桌面代理
-            - 支持通过已登录浏览器的 Cookie 通过 YouTube 验证，并显示准确错误原因
+            - YouTube 字幕选择精简为中文、日语、英语和德语，并修复导入按钮禁用问题
+            - 修复文件导入后没有进入当前文件夹的问题
+            - 提高文件夹栏展开/收起箭头的可见度并调整位置
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 1

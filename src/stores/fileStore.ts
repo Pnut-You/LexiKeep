@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { invoke } from '@tauri-apps/api/core';
 import { ask, message, open, save } from '@tauri-apps/plugin-dialog';
 import { readFile, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
-import type { FileRecord, BackupPayload, FolderInfo } from '../lib/types';
+import type { FileRecord, BackupPayload, FolderInfo, ImportPayload } from '../lib/types';
 import { computeHash } from '../lib/hash';
 import { parseFile, type ParsedResult } from '../lib/parser';
 import type { Language } from '../lib/languages';
@@ -26,6 +26,7 @@ interface PendingImport {
   parsed: ParsedResult | null;
   replaceFileId: number | null;
   replaceFileName: string | null;
+  folderId: number | null;
   language: Language | null;
 }
 
@@ -339,7 +340,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
           hash,
           parsed: null,
           replaceFileId: duplicate?.file_id ?? null,
-           replaceFileName: duplicate?.name ?? null,
+          replaceFileName: duplicate?.name ?? null,
+          folderId: get().currentFolderId,
             language: null,
          },
        });
@@ -437,19 +439,20 @@ export const useFileStore = create<FileStore>((set, get) => ({
     if (get().confirming) return;
     set({ confirming: true });
     try {
+      const payload: ImportPayload = {
+        name: pending.name,
+        file_type: pending.fileType,
+        content: pending.content,
+        content_hash: pending.hash,
+        language: pending.language,
+        segments: pending.parsed.segments,
+        lemmas: pending.parsed.lemmas,
+        occurrences: pending.parsed.occurrences,
+        replace_file_id: pending.replaceFileId,
+        folder_id: pending.folderId,
+      };
       await invoke('import_file', {
-        payload: {
-          name: pending.name,
-          file_type: pending.fileType,
-          content: pending.content,
-           content_hash: pending.hash,
-           language: pending.language,
-          segments: pending.parsed.segments,
-          lemmas: pending.parsed.lemmas,
-          occurrences: pending.parsed.occurrences,
-          replaceFileId: pending.replaceFileId,
-          folderId: get().currentFolderId,
-        },
+        payload,
       });
       set({ pendingImport: null });
       if (usePreferencesStore.getState().language === pending.language) {
@@ -529,6 +532,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
           parsed,
           replaceFileId,
           replaceFileName,
+          folderId: get().currentFolderId,
           language,
         },
       });

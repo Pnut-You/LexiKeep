@@ -19,8 +19,9 @@ pub struct ImportPayload {
     #[serde(default)]
     #[allow(dead_code)]
     pub phrase_occurrences: Option<Vec<PhraseOccurrenceInput>>,
+    #[serde(alias = "replaceFileId")]
     pub replace_file_id: Option<i64>,
-    #[serde(default)]
+    #[serde(default, alias = "folderId")]
     pub folder_id: Option<i64>,
     #[serde(default = "default_language")]
     pub language: String,

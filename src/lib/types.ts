@@ -128,7 +128,7 @@ export interface ImportPayload {
   lemmas: string[];
   occurrences: OccurrenceInput[];
   phrase_occurrences?: PhraseOccurrenceInput[];
-  replace_file_id?: number;
+  replace_file_id?: number | null;
   folder_id?: number | null;
   language: Language;
 }

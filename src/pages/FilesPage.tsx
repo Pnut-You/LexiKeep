@@ -384,7 +384,9 @@ export default function FilesPage() {
           wordCount={pendingImport.parsed.lemmas.length}
           language={pendingImport.language}
           replaceFileName={pendingImport.replaceFileName}
-          targetFolder={currentFolderId === null ? t('files.root') : path.map((item) => item.name).join(' / ') || t('files.root')}
+          targetFolder={pendingImport.folderId === null
+            ? t('files.root')
+            : getFolderPath(folders, pendingImport.folderId).map((item) => item.name).join(' / ') || t('files.root')}
           preview={pendingImport.parsed.segments.slice(0, 8).map((segment) => ({
             en: segment.en_text,
             zh: segment.zh_text,
@@ -397,20 +399,20 @@ export default function FilesPage() {
 
       <div className="flex min-h-0 flex-1">
         <aside
-          className={`hidden shrink-0 border-r border-gray-100 sm:flex ${treeOpen ? 'w-52' : 'w-9'}`}
+          className={`hidden shrink-0 border-r border-gray-100 sm:flex ${treeOpen ? 'w-52' : 'w-11'}`}
         >
           {treeOpen ? (
             <div className="flex min-h-0 flex-1 flex-col">
-              <div className="flex shrink-0 items-center justify-between px-3 py-2">
+              <div className="flex shrink-0 items-center justify-between px-2 py-1.5">
                 <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
                   {t('files.folders')}
                 </span>
                 <button
                   onClick={() => setTreeOpen(false)}
                   aria-label={t('files.collapseTree')}
-                  className="p-1 text-gray-400 transition-colors hover:text-gray-700"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={18} strokeWidth={2.5} />
                 </button>
               </div>
               <div className="min-h-0 flex-1">
@@ -431,13 +433,13 @@ export default function FilesPage() {
               </div>
             </div>
           ) : (
-            <div className="flex w-9 justify-center pt-2">
+            <div className="flex w-11 justify-center pt-1.5">
               <button
                 onClick={() => setTreeOpen(true)}
                 aria-label={t('files.expandTree')}
-                className="p-1 text-gray-400 transition-colors hover:text-gray-700"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-100"
               >
-                <ChevronRight size={16} />
+                <ChevronRight size={18} strokeWidth={2.5} />
               </button>
             </div>
           )}
