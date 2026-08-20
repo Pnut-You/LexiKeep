@@ -10,7 +10,7 @@ use tauri::{AppHandle, Emitter};
 const UA: &str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36";
 const CANCELLED_MESSAGE: &str = "ERR_CANCELLED";
 const DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(60);
-const LIST_TIMEOUT: Duration = Duration::from_secs(30);
+const LIST_TIMEOUT: Duration = Duration::from_secs(90);
 const OPERATION_TIMEOUT: Duration = Duration::from_secs(120);
 const METADATA_TTL: Duration = Duration::from_secs(600);
 
@@ -48,31 +48,27 @@ pub struct TrackSelection {
     pub is_auto: bool,
 }
 
-fn ytdlp_path() -> Option<&'static Path> {
-    static CACHED: OnceLock<Option<PathBuf>> = OnceLock::new();
-    CACHED
-        .get_or_init(|| {
-            let mut candidates: Vec<PathBuf> = vec![
-                PathBuf::from("/opt/homebrew/bin/yt-dlp"),
-                PathBuf::from("/usr/local/bin/yt-dlp"),
-                PathBuf::from("/usr/bin/yt-dlp"),
-            ];
-            if let Some(home) = std::env::var_os("HOME") {
-                let home = PathBuf::from(home);
-                candidates.push(home.join(".local/bin/yt-dlp"));
-                candidates.push(home.join(".cargo/bin/yt-dlp"));
-            }
-            candidates.into_iter().find(|p| p.is_file())
-            .or_else(|| {
-                Command::new("yt-dlp")
-                    .arg("--version")
-                    .output()
-                    .ok()
-                    .filter(|o| o.status.success())
-                    .map(|_| PathBuf::from("yt-dlp"))
-            })
-        })
-        .as_deref()
+fn ytdlp_path() -> Option<PathBuf> {
+    // Resolve on every call so an in-place yt-dlp install/update becomes
+    // visible immediately without requiring LexiKeep to restart.
+    let mut candidates: Vec<PathBuf> = vec![
+        PathBuf::from("/opt/homebrew/bin/yt-dlp"),
+        PathBuf::from("/usr/local/bin/yt-dlp"),
+        PathBuf::from("/usr/bin/yt-dlp"),
+    ];
+    if let Some(home) = std::env::var_os("HOME") {
+        let home = PathBuf::from(home);
+        candidates.push(home.join(".local/bin/yt-dlp"));
+        candidates.push(home.join(".cargo/bin/yt-dlp"));
+    }
+    candidates.into_iter().find(|p| p.is_file()).or_else(|| {
+        Command::new("yt-dlp")
+            .arg("--version")
+            .output()
+            .ok()
+            .filter(|o| o.status.success())
+            .map(|_| PathBuf::from("yt-dlp"))
+    })
 }
 
 fn ytdlp_version() -> Option<String> {
@@ -502,6 +498,7 @@ async fn fetch_ytdlp_json(
     let mut cmd = tokio::process::Command::new(ytdlp_path().expect("yt-dlp not found"));
     cmd.arg("--skip-download")
         .arg("--no-playlist")
+        .arg("--ignore-no-formats-error")
         .arg("--dump-single-json")
         .arg(url);
     let (status, stdout, stderr) = run_ytdlp_capture(&mut cmd, cancel, LIST_TIMEOUT).await?;
@@ -607,6 +604,7 @@ async fn list_subs_http(url: &str) -> Result<VideoSubInfo, String> {
 
 #[tauri::command]
 pub async fn youtube_list_subs(url: String) -> Result<VideoSubInfo, String> {
+    let mut ytdlp_error = None;
     if ytdlp_version().is_some() {
         match list_subs_ytdlp(&url).await {
             Ok(info) => {
@@ -614,11 +612,21 @@ pub async fn youtube_list_subs(url: String) -> Result<VideoSubInfo, String> {
                     return Ok(info);
                 }
                 log::info!("yt-dlp 未发现字幕，尝试 HTTP 回退确认");
+                ytdlp_error = Some("yt-dlp 未发现可用字幕".to_string());
             }
-            Err(e) => log::warn!("yt-dlp 列字幕失败，尝试 HTTP 回退：{e}"),
+            Err(error) => {
+                log::warn!("yt-dlp 列字幕失败，尝试 HTTP 回退：{error}");
+                ytdlp_error = Some(error);
+            }
         }
     }
-    list_subs_http(&url).await
+    match list_subs_http(&url).await {
+        Ok(info) => Ok(info),
+        Err(http_error) => Err(match ytdlp_error {
+            Some(error) => format!("{error}；HTTP 回退也失败：{http_error}"),
+            None => http_error,
+        }),
+    }
 }
 
 fn create_temp_dir() -> Result<PathBuf, String> {

@@ -63,14 +63,12 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.0
+            ## LexiKeep v1.1.1
 
-            - 新增 Qwen 中国站与国际站的一键配置
-            - 新增 OpenAI、DeepSeek、OpenCode 和自定义兼容服务预设
-            - 连接后加载并列出全部可用模型，切换模型立即生效
-            - 修复云端 API 错误沿用本地 Ollama 地址的问题
-            - 修复浏览器体验模式缺少 Tauri invoke 桥接导致的连接错误
-            - 更新全平台应用图标与界面品牌展示
+            - 修复更新 yt-dlp 后应用仍缓存旧路径的问题
+            - 提高 YouTube 视频与字幕信息解析超时上限
+            - 增强新版与旧版 yt-dlp 的视频元数据兼容性
+            - HTTP 回退失败时保留真正的 yt-dlp 错误，方便排查
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -109,14 +107,12 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.0
+            ## LexiKeep v1.1.1
 
-            - 新增 Qwen 中国站与国际站的一键配置
-            - 新增 OpenAI、DeepSeek、OpenCode 和自定义兼容服务预设
-            - 连接后加载并列出全部可用模型，切换模型立即生效
-            - 修复云端 API 错误沿用本地 Ollama 地址的问题
-            - 修复浏览器体验模式缺少 Tauri invoke 桥接导致的连接错误
-            - 更新全平台应用图标与界面品牌展示
+            - 修复更新 yt-dlp 后应用仍缓存旧路径的问题
+            - 提高 YouTube 视频与字幕信息解析超时上限
+            - 增强新版与旧版 yt-dlp 的视频元数据兼容性
+            - HTTP 回退失败时保留真正的 yt-dlp 错误，方便排查
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -160,14 +156,12 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.0
+            ## LexiKeep v1.1.1
 
-            - 新增 Qwen 中国站与国际站的一键配置
-            - 新增 OpenAI、DeepSeek、OpenCode 和自定义兼容服务预设
-            - 连接后加载并列出全部可用模型，切换模型立即生效
-            - 修复云端 API 错误沿用本地 Ollama 地址的问题
-            - 修复浏览器体验模式缺少 Tauri invoke 桥接导致的连接错误
-            - 更新全平台应用图标与界面品牌展示
+            - 修复更新 yt-dlp 后应用仍缓存旧路径的问题
+            - 提高 YouTube 视频与字幕信息解析超时上限
+            - 增强新版与旧版 yt-dlp 的视频元数据兼容性
+            - HTTP 回退失败时保留真正的 yt-dlp 错误，方便排查
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -212,14 +206,12 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.0
+            ## LexiKeep v1.1.1
 
-            - 新增 Qwen 中国站与国际站的一键配置
-            - 新增 OpenAI、DeepSeek、OpenCode 和自定义兼容服务预设
-            - 连接后加载并列出全部可用模型，切换模型立即生效
-            - 修复云端 API 错误沿用本地 Ollama 地址的问题
-            - 修复浏览器体验模式缺少 Tauri invoke 桥接导致的连接错误
-            - 更新全平台应用图标与界面品牌展示
+            - 修复更新 yt-dlp 后应用仍缓存旧路径的问题
+            - 提高 YouTube 视频与字幕信息解析超时上限
+            - 增强新版与旧版 yt-dlp 的视频元数据兼容性
+            - HTTP 回退失败时保留真正的 yt-dlp 错误，方便排查
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 1
