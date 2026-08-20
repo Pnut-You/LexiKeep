@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { invoke } from '@tauri-apps/api/core';
 import { ask, message, open, save } from '@tauri-apps/plugin-dialog';
-import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
+import { readFile, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import type { FileRecord, BackupPayload, FolderInfo } from '../lib/types';
 import { computeHash } from '../lib/hash';
 import { parseFile, type ParsedResult } from '../lib/parser';
@@ -14,10 +14,13 @@ import { useFeedbackStore } from './feedbackStore';
 import { usePreferencesStore } from './preferencesStore';
 import i18n from '../i18n';
 import { isCancelledError } from '../lib/errors';
+import { extractPdfText, PdfNoTextError } from '../lib/pdf';
+
+type ImportFileType = 'txt' | 'srt' | 'pdf';
 
 interface PendingImport {
   name: string;
-  fileType: 'txt' | 'srt';
+  fileType: ImportFileType;
   content: string;
   hash: string;
   parsed: ParsedResult | null;
@@ -192,8 +195,8 @@ async function enrichChineseParsing(parsed: ParsedResult): Promise<ParsedResult>
   return { ...parsed, lemmas: [...lemmas], occurrences };
 }
 
-async function parseContent(content: string, fileType: 'txt' | 'srt', language: Language): Promise<ParsedResult> {
-  let parsed = parseFile(content, fileType, 'auto', language);
+async function parseContent(content: string, fileType: ImportFileType, language: Language): Promise<ParsedResult> {
+  let parsed = parseFile(content, fileType === 'srt' ? 'srt' : 'txt', 'auto', language);
   if (language === 'ja') {
     parsed = await enrichJapaneseParsing(parsed);
   } else if (language === 'de') {
@@ -303,16 +306,18 @@ export const useFileStore = create<FileStore>((set, get) => ({
   importFile: async () => {
     try {
       const selected = await open({
-        filters: [{ name: i18n.t('fileStore.dialogFilterText'), extensions: ['txt', 'srt'] }],
+        filters: [{ name: i18n.t('fileStore.dialogFilterText'), extensions: ['txt', 'srt', 'pdf'] }],
         multiple: false,
       });
       if (!selected) return;
 
       const filePath = selected as string;
-      const content = await readTextFile(filePath);
-
       const name = filePath.split(/[\\/]/).pop() || 'unknown';
-      const fileType = name.endsWith('.srt') ? 'srt' as const : 'txt' as const;
+      const extension = name.split('.').pop()?.toLowerCase();
+      const fileType: ImportFileType = extension === 'srt' ? 'srt' : extension === 'pdf' ? 'pdf' : 'txt';
+      const content = fileType === 'pdf'
+        ? await extractPdfText(await readFile(filePath))
+        : await readTextFile(filePath);
       const hash = await computeHash(content);
 
       const duplicate: { file_id: number; name: string } | null = await invoke('check_duplicate', { hash });
@@ -340,7 +345,10 @@ export const useFileStore = create<FileStore>((set, get) => ({
        });
     } catch (e) {
       console.error('Import failed:', e);
-      useFeedbackStore.getState().show(i18n.t('fileStore.parseFailed'), 'error');
+      useFeedbackStore.getState().show(
+        e instanceof PdfNoTextError ? i18n.t('fileStore.pdfNoText') : i18n.t('fileStore.parseFailed'),
+        'error',
+      );
     }
   },
 

@@ -95,7 +95,7 @@
     },
     "youtube": {
       "title": "YouTube 字幕ツール",
-      "description": "YouTube からの字幕のインポートには yt-dlp による字幕のダウンロードが必要です。未インストールの場合は字幕トラックの一覧表示のみ可能で、ダウンロードは失敗します。",
+      "description": "動画を再生せず、既存の手動字幕または自動字幕を直接読み取ります。YouTube のログイン確認が表示された場合は、ログイン済みブラウザを Cookie の取得元に選択できます。",
       "recheck": "再チェック",
       "installed": "yt-dlp はインストール済み{{version}}",
       "notInstalled": "yt-dlp が見つかりません",
@@ -106,7 +106,10 @@
       "macOs": "macOS（Homebrew）：",
       "windows": "Windows：",
       "linux": "Linux：",
-      "or": "または"
+      "or": "または",
+      "cookieBrowser": "YouTube ログイン Cookie の取得元",
+      "cookieNone": "ブラウザ Cookie を使用しない",
+      "cookieHint": "ログインまたはボット確認を求められた場合のみ選択してください。LexiKeep は yt-dlp を通じて選択したブラウザのローカル Cookie を読み取ります。先にブラウザを終了し、YouTube にログイン済みであることを確認してください。"
     },
     "theme": {
       "title": "表示テーマ",
@@ -404,7 +407,7 @@
     "downloadImport": "ダウンロードしてインポート",
     "cancel": "キャンセル",
     "close": "閉じる",
-    "ytdlpErrorHint": "「設定 → YouTube 字幕ツール」で yt-dlp のインストール方法を確認してから再試行してください。"
+    "ytdlpErrorHint": "「設定 → YouTube 字幕ツール」で yt-dlp を確認し、ログイン確認が必要な場合は YouTube にログイン済みのブラウザを選択してください。"
   },
   "importLang": {
     "title": "学習言語を選択",
@@ -452,7 +455,7 @@
     "midnightDescription": "眩しさが少なく、夜間の使用に最適"
   },
   "fileStore": {
-    "dialogFilterText": "テキスト/字幕",
+    "dialogFilterText": "テキスト・字幕・PDF",
     "dialogFilterKnownWords": "既知の単語リスト",
     "dialogFilterDictionary": "オフライン辞書パック",
     "dialogFilterBackup": "JSON バックアップ",
@@ -460,6 +463,7 @@
     "duplicateTitle": "重複ファイル",
     "overwrite": "上書き",
     "parseFailed": "ファイルを解析できませんでした。ファイル形式を確認してください。",
+    "pdfNoText": "この PDF には抽出可能なテキストレイヤーがなく、スキャン文書の可能性があります。OCR で検索可能な PDF に変換してから再度インポートしてください。",
     "noValidWords": "単語リストに有効な単語がありませんでした",
     "knownWordsImported": "{{matched}} 個が一致、未処理の {{target}} 個を既知にマーク、不一致 {{unmatched}} 個",
     "knownWordsImportFailed": "既知の単語リストのインポートに失敗しました",

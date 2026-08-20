@@ -96,7 +96,7 @@
     },
     "youtube": {
       "title": "YouTube Subtitle Tool",
-      "description": "Importing subtitles from YouTube relies on yt-dlp to download subtitle content. Without it installed, only the subtitle tracks can be listed and downloads will fail.",
+      "description": "Reads a video's existing manual or automatic captions without playing it. If YouTube requests sign-in verification, choose a signed-in browser as the cookie source.",
       "recheck": "Re-check",
       "installed": "yt-dlp installed{{version}}",
       "notInstalled": "yt-dlp not detected",
@@ -107,7 +107,10 @@
       "macOs": "macOS (Homebrew):",
       "windows": "Windows:",
       "linux": "Linux:",
-      "or": "or"
+      "or": "or",
+      "cookieBrowser": "YouTube sign-in cookie source",
+      "cookieNone": "Do not use browser cookies",
+      "cookieHint": "Only select this when YouTube requests sign-in or bot verification. LexiKeep asks yt-dlp to read cookies locally from the selected browser; close the browser first and make sure it is signed in to YouTube."
     },
     "theme": {
       "title": "Interface Theme",
@@ -420,7 +423,7 @@
     "downloadImport": "Download & Import",
     "cancel": "Cancel",
     "close": "Close",
-    "ytdlpErrorHint": "Go to Settings → YouTube Subtitle Tool to see how to install yt-dlp, then retry."
+    "ytdlpErrorHint": "Go to Settings → YouTube Subtitle Tool to check yt-dlp and select a browser signed in to YouTube when verification is required."
   },
   "importLang": {
     "title": "Select Learning Language",
@@ -470,7 +473,7 @@
     "midnightDescription": "Low glare, ideal for night use"
   },
   "fileStore": {
-    "dialogFilterText": "Text / Subtitles",
+    "dialogFilterText": "Text, subtitles, or PDF",
     "dialogFilterKnownWords": "Known word list",
     "dialogFilterDictionary": "Offline dictionary pack",
     "dialogFilterBackup": "JSON backup",
@@ -478,6 +481,7 @@
     "duplicateTitle": "Duplicate File",
     "overwrite": "Overwrite",
     "parseFailed": "Failed to parse the file. Please check the file format.",
+    "pdfNoText": "This PDF has no extractable text layer and may be scanned. Run OCR to make it searchable, then import it again.",
     "noValidWords": "No valid words recognized in the word list",
     "knownWordsImported": "Matched {{matched}} words; marked {{target}} unprocessed words as known; {{unmatched}} unmatched",
     "knownWordsImportFailed": "Failed to import known word list",

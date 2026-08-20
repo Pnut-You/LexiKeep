@@ -3,6 +3,12 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import type { AiConfig } from '../lib/ai';
 import i18n from '../i18n';
+import { usePreferencesStore } from './preferencesStore';
+
+function selectedCookieBrowser(): string | null {
+  const browser = usePreferencesStore.getState().youtubeCookieBrowser;
+  return browser === 'none' ? null : browser;
+}
 
 export interface SubtitleTrack {
   lang: string;
@@ -92,7 +98,7 @@ export const useYoutubeStore = create<YoutubeStore>((set) => ({
     });
   },
 
-  listSubs: async (url) => invoke('youtube_list_subs', { url }),
+  listSubs: async (url) => invoke('youtube_list_subs', { url, cookieBrowser: selectedCookieBrowser() }),
 
   downloadSub: async (jobId, url, lang, isAuto) => {
     set((state) => ({
@@ -108,7 +114,13 @@ export const useYoutubeStore = create<YoutubeStore>((set) => ({
       },
     }));
     try {
-      return await invoke<SubtitleResult>('youtube_download_sub', { jobId, url, lang, isAuto });
+      return await invoke<SubtitleResult>('youtube_download_sub', {
+        jobId,
+        url,
+        lang,
+        isAuto,
+        cookieBrowser: selectedCookieBrowser(),
+      });
     } finally {
       set((state) => {
         const downloadProgress = { ...state.downloadProgress };
@@ -137,6 +149,7 @@ export const useYoutubeStore = create<YoutubeStore>((set) => ({
         url,
         primary,
         secondary,
+        cookieBrowser: selectedCookieBrowser(),
       });
     } finally {
       set((state) => {

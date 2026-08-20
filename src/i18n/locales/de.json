@@ -96,7 +96,7 @@
     },
     "youtube": {
       "title": "YouTube-Untertitel-Tool",
-      "description": "Das Importieren von Untertiteln von YouTube hängt von yt-dlp ab, um die Untertitel herunterzuladen. Ohne Installation können nur die Untertitelspuren aufgelistet werden; Downloads schlagen fehl.",
+      "description": "Liest vorhandene manuelle oder automatische Untertitel direkt, ohne das Video abzuspielen. Falls YouTube eine Anmeldung verlangt, kann ein angemeldeter Browser als Cookie-Quelle gewählt werden.",
       "recheck": "Erneut prüfen",
       "installed": "yt-dlp installiert{{version}}",
       "notInstalled": "yt-dlp nicht erkannt",
@@ -107,7 +107,10 @@
       "macOs": "macOS (Homebrew):",
       "windows": "Windows:",
       "linux": "Linux:",
-      "or": "oder"
+      "or": "oder",
+      "cookieBrowser": "Quelle der YouTube-Anmelde-Cookies",
+      "cookieNone": "Keine Browser-Cookies verwenden",
+      "cookieHint": "Nur auswählen, wenn YouTube eine Anmeldung oder Bot-Prüfung verlangt. LexiKeep lässt yt-dlp die lokalen Cookies des gewählten Browsers lesen; schließen Sie den Browser vorher und stellen Sie sicher, dass YouTube dort angemeldet ist."
     },
     "theme": {
       "title": "Oberflächenthema",
@@ -420,7 +423,7 @@
     "downloadImport": "Herunterladen & Importieren",
     "cancel": "Abbrechen",
     "close": "Schließen",
-    "ytdlpErrorHint": "Gehen Sie zu Einstellungen → YouTube-Untertitel-Tool, um die yt-dlp-Installation zu sehen, und versuchen Sie es erneut."
+    "ytdlpErrorHint": "Prüfen Sie unter Einstellungen → YouTube-Untertitel-Tool yt-dlp und wählen Sie bei einer Anmeldeprüfung einen bei YouTube angemeldeten Browser."
   },
   "importLang": {
     "title": "Lernsprache auswählen",
@@ -470,7 +473,7 @@
     "midnightDescription": "Geringe Blendung, ideal für die Nutzung bei Nacht"
   },
   "fileStore": {
-    "dialogFilterText": "Text / Untertitel",
+    "dialogFilterText": "Text, Untertitel oder PDF",
     "dialogFilterKnownWords": "Liste bekannter Wörter",
     "dialogFilterDictionary": "Offline-Wörterbuchpaket",
     "dialogFilterBackup": "JSON-Sicherung",
@@ -478,6 +481,7 @@
     "duplicateTitle": "Doppelte Datei",
     "overwrite": "Überschreiben",
     "parseFailed": "Datei konnte nicht analysiert werden. Bitte Dateiformat prüfen.",
+    "pdfNoText": "Diese PDF-Datei enthält keine extrahierbare Textebene und ist möglicherweise gescannt. Bitte zuerst per OCR durchsuchbar machen und erneut importieren.",
     "noValidWords": "In der Wortliste wurden keine gültigen Wörter erkannt",
     "knownWordsImported": "{{matched}} übereinstimmend; {{target}} unbearbeitete Wörter als bekannt markiert; {{unmatched}} ohne Übereinstimmung",
     "knownWordsImportFailed": "Import der Liste bekannter Wörter fehlgeschlagen",

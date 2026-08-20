@@ -71,6 +71,8 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const uiLanguage = usePreferencesStore((state) => state.uiLanguage);
   const setUiLanguage = usePreferencesStore((state) => state.setUiLanguage);
+  const youtubeCookieBrowser = usePreferencesStore((state) => state.youtubeCookieBrowser);
+  const setYoutubeCookieBrowser = usePreferencesStore((state) => state.setYoutubeCookieBrowser);
   const importDictionaryPack = useFileStore((state) => state.importDictionaryPack);
   const [sources, setSources] = useState<DictionarySource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -534,6 +536,28 @@ export default function SettingsPage() {
               )}
             </div>
           )}
+
+          <div className="mt-4 max-w-xl">
+            <label htmlFor="youtube-cookie-browser" className="text-sm font-medium text-gray-700">
+              {t('settings.youtube.cookieBrowser')}
+            </label>
+            <select
+              id="youtube-cookie-browser"
+              value={youtubeCookieBrowser}
+              onChange={(event) => setYoutubeCookieBrowser(event.target.value as typeof youtubeCookieBrowser)}
+              className="mt-2 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100"
+            >
+              <option value="none">{t('settings.youtube.cookieNone')}</option>
+              <option value="firefox">Firefox</option>
+              <option value="chrome">Google Chrome</option>
+              <option value="chromium">Chromium</option>
+              <option value="edge">Microsoft Edge</option>
+              <option value="brave">Brave</option>
+            </select>
+            <p className="mt-2 text-xs leading-5 text-gray-500">
+              {t('settings.youtube.cookieHint')}
+            </p>
+          </div>
         </section>
 
         <section id="theme" className="scroll-mt-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">

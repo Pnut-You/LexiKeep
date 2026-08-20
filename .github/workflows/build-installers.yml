@@ -63,11 +63,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.2
+            ## LexiKeep v1.1.3
 
-            - 修复 Linux 检查更新时错误显示 Android 提示的问题
-            - 手动更新兜底会直接下载当前系统对应的安装包
-            - 全面复查官网、仓库、下载和应用内跳转，统一为 LexiKeep 官方地址
+            - 支持导入带文字层的 PDF 文件
+            - YouTube 字幕工具自动使用 Linux 桌面代理
+            - 支持通过已登录浏览器的 Cookie 通过 YouTube 验证，并显示准确错误原因
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -106,11 +106,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.2
+            ## LexiKeep v1.1.3
 
-            - 修复 Linux 检查更新时错误显示 Android 提示的问题
-            - 手动更新兜底会直接下载当前系统对应的安装包
-            - 全面复查官网、仓库、下载和应用内跳转，统一为 LexiKeep 官方地址
+            - 支持导入带文字层的 PDF 文件
+            - YouTube 字幕工具自动使用 Linux 桌面代理
+            - 支持通过已登录浏览器的 Cookie 通过 YouTube 验证，并显示准确错误原因
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -154,11 +154,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.2
+            ## LexiKeep v1.1.3
 
-            - 修复 Linux 检查更新时错误显示 Android 提示的问题
-            - 手动更新兜底会直接下载当前系统对应的安装包
-            - 全面复查官网、仓库、下载和应用内跳转，统一为 LexiKeep 官方地址
+            - 支持导入带文字层的 PDF 文件
+            - YouTube 字幕工具自动使用 Linux 桌面代理
+            - 支持通过已登录浏览器的 Cookie 通过 YouTube 验证，并显示准确错误原因
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -203,11 +203,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.2
+            ## LexiKeep v1.1.3
 
-            - 修复 Linux 检查更新时错误显示 Android 提示的问题
-            - 手动更新兜底会直接下载当前系统对应的安装包
-            - 全面复查官网、仓库、下载和应用内跳转，统一为 LexiKeep 官方地址
+            - 支持导入带文字层的 PDF 文件
+            - YouTube 字幕工具自动使用 Linux 桌面代理
+            - 支持通过已登录浏览器的 Cookie 通过 YouTube 验证，并显示准确错误原因
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 1

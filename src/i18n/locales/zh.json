@@ -95,7 +95,7 @@
     },
     "youtube": {
       "title": "YouTube 字幕工具",
-      "description": "从 YouTube 导入字幕依赖 yt-dlp 下载字幕内容。未安装时仅能列出视频的字幕资源，下载会失败。",
+      "description": "直接读取视频已有的人工或自动字幕，不需要播放视频。遇到 YouTube 登录验证时，可选择一个已登录的浏览器读取 Cookie。",
       "recheck": "重新检测",
       "installed": "已安装 yt-dlp{{version}}",
       "notInstalled": "未检测到 yt-dlp",
@@ -106,7 +106,10 @@
       "macOs": "macOS（Homebrew）：",
       "windows": "Windows：",
       "linux": "Linux：",
-      "or": "或"
+      "or": "或",
+      "cookieBrowser": "YouTube 登录 Cookie 来源",
+      "cookieNone": "不使用浏览器 Cookie",
+      "cookieHint": "只有出现登录或机器人验证时才需要选择。LexiKeep 会让 yt-dlp 直接读取所选浏览器的本地 Cookie；请先关闭该浏览器，并确保其中已登录 YouTube。"
     },
     "theme": {
       "title": "界面主题",
@@ -404,7 +407,7 @@
     "downloadImport": "下载并导入",
     "cancel": "取消",
     "close": "关闭",
-    "ytdlpErrorHint": "可前往「设置 → YouTube 字幕工具」查看 yt-dlp 安装方法后重试。"
+    "ytdlpErrorHint": "可前往「设置 → YouTube 字幕工具」检查 yt-dlp，并在登录验证时选择已登录 YouTube 的浏览器。"
   },
   "importLang": {
     "title": "选择学习语言",
@@ -452,7 +455,7 @@
     "midnightDescription": "低眩光，适合夜间使用"
   },
   "fileStore": {
-    "dialogFilterText": "文本/字幕",
+    "dialogFilterText": "文本、字幕或 PDF",
     "dialogFilterKnownWords": "已掌握词表",
     "dialogFilterDictionary": "离线词典包",
     "dialogFilterBackup": "JSON 备份",
@@ -460,6 +463,7 @@
     "duplicateTitle": "重复文件",
     "overwrite": "覆盖",
     "parseFailed": "文件解析失败，请检查文件格式",
+    "pdfNoText": "这个 PDF 没有可提取的文字层，可能是扫描件；请先使用 OCR 转为可搜索 PDF 后再导入。",
     "noValidWords": "词表中没有识别到有效单词",
     "knownWordsImported": "词表匹配 {{matched}} 个，已将 {{target}} 个未处理词标记为已掌握，未匹配 {{unmatched}} 个",
     "knownWordsImportFailed": "已掌握词表导入失败",

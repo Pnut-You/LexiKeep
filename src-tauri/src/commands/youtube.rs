@@ -127,10 +127,105 @@ fn extract_video_id(url: &str) -> Option<String> {
     None
 }
 
+fn environment_proxy_url() -> Option<String> {
+    [
+        "HTTPS_PROXY",
+        "https_proxy",
+        "ALL_PROXY",
+        "all_proxy",
+        "HTTP_PROXY",
+        "http_proxy",
+    ]
+    .iter()
+    .find_map(|key| {
+        std::env::var(key)
+            .ok()
+            .map(|value| value.trim().to_string())
+            .filter(|value| !value.is_empty())
+    })
+}
+
+#[cfg(target_os = "linux")]
+fn gsettings_value(schema: &str, key: &str) -> Option<String> {
+    let output = Command::new("gsettings")
+        .args(["get", schema, key])
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let value = String::from_utf8_lossy(&output.stdout)
+        .trim()
+        .trim_matches('\'')
+        .trim_matches('"')
+        .to_string();
+    (!value.is_empty()).then_some(value)
+}
+
+#[cfg(target_os = "linux")]
+fn desktop_proxy_url() -> Option<String> {
+    if gsettings_value("org.gnome.system.proxy", "mode").as_deref() != Some("manual") {
+        return None;
+    }
+    for protocol in ["https", "http"] {
+        let schema = format!("org.gnome.system.proxy.{protocol}");
+        let Some(host) = gsettings_value(&schema, "host") else {
+            continue;
+        };
+        let port = gsettings_value(&schema, "port")?.parse::<u16>().ok()?;
+        if port > 0 {
+            return Some(format!("http://{host}:{port}"));
+        }
+    }
+    None
+}
+
+#[cfg(not(target_os = "linux"))]
+fn desktop_proxy_url() -> Option<String> {
+    None
+}
+
+fn youtube_proxy_url() -> Option<String> {
+    environment_proxy_url().or_else(desktop_proxy_url)
+}
+
+fn youtube_http_proxy_url() -> Option<String> {
+    environment_proxy_url()
+        .filter(|url| url.starts_with("http://") || url.starts_with("https://"))
+        .or_else(desktop_proxy_url)
+}
+
+fn normalized_cookie_browser(browser: Option<&str>) -> Result<Option<&str>, String> {
+    match browser.map(str::trim).filter(|value| !value.is_empty()) {
+        None | Some("none") => Ok(None),
+        Some(value @ ("firefox" | "chrome" | "chromium" | "edge" | "brave")) => {
+            Ok(Some(value))
+        }
+        Some(_) => Err("不支持的浏览器 Cookie 来源".to_string()),
+    }
+}
+
+fn apply_ytdlp_network_options(
+    cmd: &mut tokio::process::Command,
+    cookie_browser: Option<&str>,
+) -> Result<(), String> {
+    if let Some(proxy) = youtube_proxy_url() {
+        cmd.arg("--proxy").arg(proxy);
+    }
+    if let Some(browser) = normalized_cookie_browser(cookie_browser)? {
+        cmd.arg("--cookies-from-browser").arg(browser);
+    }
+    Ok(())
+}
+
 fn youtube_client() -> Result<reqwest::Client, String> {
-    reqwest::Client::builder()
+    let mut builder = reqwest::Client::builder()
         .connect_timeout(std::time::Duration::from_secs(10))
-        .timeout(std::time::Duration::from_secs(30))
+        .timeout(std::time::Duration::from_secs(30));
+    if let Some(proxy) = youtube_http_proxy_url() {
+        builder = builder.proxy(reqwest::Proxy::all(&proxy).map_err(|e| e.to_string())?);
+    }
+    builder
         .build()
         .map_err(|e| e.to_string())
 }
@@ -306,7 +401,7 @@ fn friendly_ytdlp_error(stderr: &str) -> String {
     };
     pick(
         &["sign in to confirm you're not a bot", "not a bot", "bot check"],
-        "YouTube 触发了机器人验证，请稍后重试或更换网络环境。",
+        "YouTube 要求登录/机器人验证。请在「设置 → YouTube 字幕工具」中选择你已登录 YouTube 的浏览器，然后重试。",
     )
     .or_else(|| {
         pick(
@@ -349,6 +444,13 @@ fn friendly_ytdlp_error(stderr: &str) -> String {
             .collect();
         format!("yt-dlp 出错：{}", cleaned.trim())
     })
+}
+
+fn requires_browser_cookies(stderr: &str) -> bool {
+    let lower = stderr.to_lowercase();
+    lower.contains("sign in to confirm you're not a bot")
+        || lower.contains("use --cookies-from-browser")
+        || lower.contains("cookies-from-browser or --cookies")
 }
 
 enum RunOutcome {
@@ -490,29 +592,36 @@ fn cache_metadata(video_id: &str, json: &serde_json::Value) {
 async fn fetch_ytdlp_json(
     cancel: Option<&DownloadJob>,
     url: &str,
+    cookie_browser: Option<&str>,
 ) -> Result<serde_json::Value, String> {
     let video_id = extract_video_id(url).unwrap_or_else(|| "video".to_string());
-    if let Some(json) = get_cached_metadata(&video_id) {
+    let browser = normalized_cookie_browser(cookie_browser)?;
+    let cache_key = format!("{video_id}|{}", browser.unwrap_or("none"));
+    if let Some(json) = get_cached_metadata(&cache_key) {
         return Ok(json);
     }
     let mut cmd = tokio::process::Command::new(ytdlp_path().expect("yt-dlp not found"));
+    apply_ytdlp_network_options(&mut cmd, browser)?;
     cmd.arg("--skip-download")
         .arg("--no-playlist")
         .arg("--ignore-no-formats-error")
         .arg("--dump-single-json")
         .arg(url);
     let (status, stdout, stderr) = run_ytdlp_capture(&mut cmd, cancel, LIST_TIMEOUT).await?;
+    if requires_browser_cookies(&stderr) {
+        return Err(friendly_ytdlp_error(&stderr));
+    }
     if !status.success() {
         return Err(friendly_ytdlp_error(&stderr));
     }
     let json: serde_json::Value =
         serde_json::from_slice(&stdout).map_err(|error| format!("解析 yt-dlp 信息失败：{error}"))?;
-    cache_metadata(&video_id, &json);
+    cache_metadata(&cache_key, &json);
     Ok(json)
 }
 
-async fn list_subs_ytdlp(url: &str) -> Result<VideoSubInfo, String> {
-    let json = fetch_ytdlp_json(None, url).await?;
+async fn list_subs_ytdlp(url: &str, cookie_browser: Option<&str>) -> Result<VideoSubInfo, String> {
+    let json = fetch_ytdlp_json(None, url, cookie_browser).await?;
 
     let title = json["title"].as_str().unwrap_or("视频").to_string();
     let thumbnail = json["thumbnails"]
@@ -603,16 +712,19 @@ async fn list_subs_http(url: &str) -> Result<VideoSubInfo, String> {
 }
 
 #[tauri::command]
-pub async fn youtube_list_subs(url: String) -> Result<VideoSubInfo, String> {
+pub async fn youtube_list_subs(
+    url: String,
+    cookie_browser: Option<String>,
+) -> Result<VideoSubInfo, String> {
+    let cookie_browser = normalized_cookie_browser(cookie_browser.as_deref())?;
     let mut ytdlp_error = None;
     if ytdlp_version().is_some() {
-        match list_subs_ytdlp(&url).await {
+        match list_subs_ytdlp(&url, cookie_browser).await {
             Ok(info) => {
                 if !info.manual.is_empty() || !info.automatic.is_empty() {
                     return Ok(info);
                 }
                 log::info!("yt-dlp 未发现字幕，尝试 HTTP 回退确认");
-                ytdlp_error = Some("yt-dlp 未发现可用字幕".to_string());
             }
             Err(error) => {
                 log::warn!("yt-dlp 列字幕失败，尝试 HTTP 回退：{error}");
@@ -621,7 +733,11 @@ pub async fn youtube_list_subs(url: String) -> Result<VideoSubInfo, String> {
         }
     }
     match list_subs_http(&url).await {
-        Ok(info) => Ok(info),
+        Ok(info) if !info.manual.is_empty() || !info.automatic.is_empty() => Ok(info),
+        Ok(info) => match ytdlp_error {
+            Some(error) => Err(error),
+            None => Ok(info),
+        },
         Err(http_error) => Err(match ytdlp_error {
             Some(error) => format!("{error}；HTTP 回退也失败：{http_error}"),
             None => http_error,
@@ -674,10 +790,12 @@ async fn download_sub_ytdlp(
     url: &str,
     lang: &str,
     is_auto: bool,
+    cookie_browser: Option<&str>,
 ) -> Result<SubtitleResult, String> {
     let video_id = extract_video_id(url).unwrap_or_else(|| "video".to_string());
     let dir = create_temp_dir()?;
     let mut cmd = tokio::process::Command::new(ytdlp_path().expect("yt-dlp not found"));
+    apply_ytdlp_network_options(&mut cmd, cookie_browser)?;
     cmd.arg("--skip-download")
         .arg("--no-playlist")
         .arg("--retries")
@@ -774,6 +892,7 @@ async fn download_sub_ytdlp_direct(
     url: &str,
     lang: &str,
     is_auto: bool,
+    cookie_browser: Option<&str>,
 ) -> Result<SubtitleResult, String> {
     let video_id = extract_video_id(url).unwrap_or_else(|| "video".to_string());
     job.progress(
@@ -782,7 +901,7 @@ async fn download_sub_ytdlp_direct(
         base_percent + span_percent * 0.05,
         &format!("正在获取字幕地址（{lang}）..."),
     );
-    let json = fetch_ytdlp_json(Some(job), url).await?;
+    let json = fetch_ytdlp_json(Some(job), url, cookie_browser).await?;
     let Some((ext, subtitle_url)) = choose_subtitle_format(&json, lang, is_auto) else {
         return Err(if is_auto {
             format!("yt-dlp 未提供“{lang}”自动字幕的可下载格式")
@@ -868,12 +987,32 @@ async fn download_sub_ytdlp_preferred(
     url: &str,
     lang: &str,
     is_auto: bool,
+    cookie_browser: Option<&str>,
 ) -> Result<SubtitleResult, String> {
-    match download_sub_ytdlp_direct(job, base_percent, span_percent, url, lang, is_auto).await {
+    match download_sub_ytdlp_direct(
+        job,
+        base_percent,
+        span_percent,
+        url,
+        lang,
+        is_auto,
+        cookie_browser,
+    )
+    .await
+    {
         Ok(result) => Ok(result),
         Err(direct_error) => {
             log::warn!("直接下载字幕失败，回退到 yt-dlp 子进程：{direct_error}");
-            download_sub_ytdlp(job, base_percent, span_percent, url, lang, is_auto).await
+            download_sub_ytdlp(
+                job,
+                base_percent,
+                span_percent,
+                url,
+                lang,
+                is_auto,
+                cookie_browser,
+            )
+            .await
         }
     }
 }
@@ -962,11 +1101,21 @@ async fn download_sub_with_job(
     url: &str,
     lang: &str,
     is_auto: bool,
+    cookie_browser: Option<&str>,
 ) -> Result<SubtitleResult, String> {
     let mut ytdlp_error: Option<String> = None;
 
     if ytdlp_version().is_some() {
-        let first = download_sub_ytdlp_preferred(job, base_percent, span_percent, url, lang, is_auto).await;
+        let first = download_sub_ytdlp_preferred(
+            job,
+            base_percent,
+            span_percent,
+            url,
+            lang,
+            is_auto,
+            cookie_browser,
+        )
+        .await;
         match first {
             Ok(result) => return Ok(result),
             Err(error) if error == CANCELLED_MESSAGE => return Err(error),
@@ -983,7 +1132,17 @@ async fn download_sub_with_job(
                     if job.cancelled() {
                         return Err(CANCELLED_MESSAGE.to_string());
                     }
-                    match download_sub_ytdlp_preferred(job, base_percent, span_percent, url, lang, is_auto).await {
+                    match download_sub_ytdlp_preferred(
+                        job,
+                        base_percent,
+                        span_percent,
+                        url,
+                        lang,
+                        is_auto,
+                        cookie_browser,
+                    )
+                    .await
+                    {
                         Ok(result) => return Ok(result),
                         Err(retry_error) if retry_error == CANCELLED_MESSAGE => {
                             return Err(retry_error);
@@ -1029,12 +1188,22 @@ pub async fn youtube_download_sub(
     url: String,
     lang: String,
     is_auto: bool,
+    cookie_browser: Option<String>,
 ) -> Result<SubtitleResult, String> {
+    let cookie_browser = normalized_cookie_browser(cookie_browser.as_deref())?;
     let job = create_download_job(app, job_id);
     let _guard = JobGuard { job_id };
     let result = match tokio::time::timeout(
         OPERATION_TIMEOUT,
-        download_sub_with_job(&job, 0.0, 100.0, &url, &lang, is_auto),
+        download_sub_with_job(
+            &job,
+            0.0,
+            100.0,
+            &url,
+            &lang,
+            is_auto,
+            cookie_browser,
+        ),
     )
     .await
     {
@@ -1056,15 +1225,35 @@ pub async fn youtube_merge_subs(
     url: String,
     primary: TrackSelection,
     secondary: TrackSelection,
+    cookie_browser: Option<String>,
 ) -> Result<SubtitleResult, String> {
+    let cookie_browser = normalized_cookie_browser(cookie_browser.as_deref())?;
     let job = create_download_job(app, job_id);
     let _guard = JobGuard { job_id };
     let body = async {
-        let sub_a = download_sub_with_job(&job, 5.0, 35.0, &url, &primary.lang, primary.is_auto).await?;
+        let sub_a = download_sub_with_job(
+            &job,
+            5.0,
+            35.0,
+            &url,
+            &primary.lang,
+            primary.is_auto,
+            cookie_browser,
+        )
+        .await?;
         if job.cancelled() {
             return Err(CANCELLED_MESSAGE.to_string());
         }
-        let sub_b = download_sub_with_job(&job, 40.0, 35.0, &url, &secondary.lang, secondary.is_auto).await?;
+        let sub_b = download_sub_with_job(
+            &job,
+            40.0,
+            35.0,
+            &url,
+            &secondary.lang,
+            secondary.is_auto,
+            cookie_browser,
+        )
+        .await?;
         job.progress(
             "processing",
             "合并字幕",
@@ -1817,10 +2006,10 @@ mod tests {
             job_id: 0,
             token: Arc::new(AtomicBool::new(false)),
         };
-        let primary = download_sub_with_job(&job, 0.0, 100.0, url, "ja", false)
+        let primary = download_sub_with_job(&job, 0.0, 100.0, url, "ja", false, None)
             .await
             .expect("download ja");
-        let secondary = download_sub_with_job(&job, 0.0, 100.0, url, "en", false)
+        let secondary = download_sub_with_job(&job, 0.0, 100.0, url, "en", false, None)
             .await
             .expect("download en");
         assert!(!primary.content.trim().is_empty());
@@ -1849,7 +2038,7 @@ mod tests {
             job_id: 3,
             token: Arc::new(AtomicBool::new(false)),
         };
-        let auto = download_sub_with_job(&job, 0.0, 100.0, url, "zh-Hans", true)
+        let auto = download_sub_with_job(&job, 0.0, 100.0, url, "zh-Hans", true, None)
             .await
             .expect("download zh-Hans auto subtitle");
         assert!(!auto.content.trim().is_empty());
@@ -1872,6 +2061,23 @@ mod tests {
         assert!(
             friendly_ytdlp_error("HTTP Error 403: Forbidden").contains("403")
         );
+    }
+
+    #[test]
+    fn detects_cookie_verification_even_when_ytdlp_exits_successfully() {
+        assert!(requires_browser_cookies(
+            "WARNING: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies"
+        ));
+        assert!(!requires_browser_cookies(
+            "WARNING: No supported JavaScript runtime could be found"
+        ));
+    }
+
+    #[test]
+    fn validates_cookie_browser_values() {
+        assert_eq!(normalized_cookie_browser(Some("firefox")).unwrap(), Some("firefox"));
+        assert_eq!(normalized_cookie_browser(Some("none")).unwrap(), None);
+        assert!(normalized_cookie_browser(Some("../cookies.txt")).is_err());
     }
 
     #[test]
