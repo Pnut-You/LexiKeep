@@ -731,9 +731,9 @@ export default function SettingsPage() {
                       className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                     >
                       <Download size={15} />
-                      {t('settings.updates.downloadPage')}
+                      {t('settings.updates.downloadInstaller')}
                     </button>
-                    <p className="mt-2 text-xs text-blue-500">{t('settings.updates.androidHint')}</p>
+                    <p className="mt-2 text-xs text-blue-500">{t('settings.updates.manualInstallHint')}</p>
                   </div>
                 ) : (
                   <div>

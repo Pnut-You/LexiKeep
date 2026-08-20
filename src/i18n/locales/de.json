@@ -156,8 +156,8 @@
       "available": "Neue Version v{{version}} verfügbar",
       "install": "Herunterladen & Installieren",
       "installHint": "Nach dem Download installiert und startet die App automatisch neu.",
-      "downloadPage": "Download-Seite öffnen",
-      "androidHint": "Automatische Updates werden unter Android nicht unterstützt. Öffnen Sie die Download-Seite, um die neueste APK zu laden und manuell zu installieren.",
+      "downloadInstaller": "Installer für dieses System herunterladen",
+      "manualInstallHint": "Diese Umgebung erfordert ein manuelles Update. Installieren Sie das heruntergeladene Paket über die vorhandene Version; eine Deinstallation ist nicht erforderlich.",
       "downloading": "Update wird heruntergeladen..."
     }
   },

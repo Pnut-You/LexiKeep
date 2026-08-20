@@ -63,12 +63,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.1
+            ## LexiKeep v1.1.2
 
-            - 修复更新 yt-dlp 后应用仍缓存旧路径的问题
-            - 提高 YouTube 视频与字幕信息解析超时上限
-            - 增强新版与旧版 yt-dlp 的视频元数据兼容性
-            - HTTP 回退失败时保留真正的 yt-dlp 错误，方便排查
+            - 修复 Linux 检查更新时错误显示 Android 提示的问题
+            - 手动更新兜底会直接下载当前系统对应的安装包
+            - 全面复查官网、仓库、下载和应用内跳转，统一为 LexiKeep 官方地址
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -107,12 +106,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.1
+            ## LexiKeep v1.1.2
 
-            - 修复更新 yt-dlp 后应用仍缓存旧路径的问题
-            - 提高 YouTube 视频与字幕信息解析超时上限
-            - 增强新版与旧版 yt-dlp 的视频元数据兼容性
-            - HTTP 回退失败时保留真正的 yt-dlp 错误，方便排查
+            - 修复 Linux 检查更新时错误显示 Android 提示的问题
+            - 手动更新兜底会直接下载当前系统对应的安装包
+            - 全面复查官网、仓库、下载和应用内跳转，统一为 LexiKeep 官方地址
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -156,12 +154,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.1
+            ## LexiKeep v1.1.2
 
-            - 修复更新 yt-dlp 后应用仍缓存旧路径的问题
-            - 提高 YouTube 视频与字幕信息解析超时上限
-            - 增强新版与旧版 yt-dlp 的视频元数据兼容性
-            - HTTP 回退失败时保留真正的 yt-dlp 错误，方便排查
+            - 修复 Linux 检查更新时错误显示 Android 提示的问题
+            - 手动更新兜底会直接下载当前系统对应的安装包
+            - 全面复查官网、仓库、下载和应用内跳转，统一为 LexiKeep 官方地址
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -206,12 +203,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.1
+            ## LexiKeep v1.1.2
 
-            - 修复更新 yt-dlp 后应用仍缓存旧路径的问题
-            - 提高 YouTube 视频与字幕信息解析超时上限
-            - 增强新版与旧版 yt-dlp 的视频元数据兼容性
-            - HTTP 回退失败时保留真正的 yt-dlp 错误，方便排查
+            - 修复 Linux 检查更新时错误显示 Android 提示的问题
+            - 手动更新兜底会直接下载当前系统对应的安装包
+            - 全面复查官网、仓库、下载和应用内跳转，统一为 LexiKeep 官方地址
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 1

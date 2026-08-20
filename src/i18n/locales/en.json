@@ -156,8 +156,8 @@
       "available": "New version v{{version}} available",
       "install": "Download & Install",
       "installHint": "The app will install and restart automatically once downloaded.",
-      "downloadPage": "Open Download Page",
-      "androidHint": "Auto-update is not supported on Android. Open the download page to get the latest APK and install it manually.",
+      "downloadInstaller": "Download Installer for This System",
+      "manualInstallHint": "This environment requires a manual update. Install the downloaded package over the current version; uninstalling is not required.",
       "downloading": "Downloading update..."
     }
   },

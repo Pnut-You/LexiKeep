@@ -1,6 +1,6 @@
 [package]
 name = "lexikeep"
-version = "1.1.1"
+version = "1.1.2"
 description = "LexiKeep - Local-first vocabulary learning tool"
 authors = ["Pnut-You"]
 license = "MIT"

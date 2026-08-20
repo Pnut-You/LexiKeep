@@ -153,8 +153,8 @@
       "available": "发现新版本 v{{version}}",
       "install": "下载并安装",
       "installHint": "下载完成后应用会自动安装并重启。",
-      "downloadPage": "打开下载页面",
-      "androidHint": "Android 版本不支持自动更新，请打开下载页面获取最新 APK 后手动安装。",
+      "downloadInstaller": "下载当前系统安装包",
+      "manualInstallHint": "当前环境需要手动更新。下载后直接覆盖安装即可，无需卸载现有版本。",
       "downloading": "正在下载更新..."
     }
   },

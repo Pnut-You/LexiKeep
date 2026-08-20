@@ -1,7 +1,7 @@
 {
   "name": "lexikeep",
   "private": true,
-  "version": "1.1.1",
+  "version": "1.1.2",
   "author": "Pnut-You",
   "repository": {
     "type": "git",
@@ -12,6 +12,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "check:brand-links": "node scripts/check-brand-links.mjs",
     "lint": "oxlint",
     "test": "vitest run",
     "preview": "vite preview",
