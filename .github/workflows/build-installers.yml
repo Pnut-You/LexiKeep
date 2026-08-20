@@ -1,6 +1,9 @@
 name: Build Installers
 
 on:
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       platform:
@@ -21,7 +24,7 @@ on:
 jobs:
   macos:
     name: macOS (Apple Silicon / Intel)
-    if: ${{ inputs.platform == 'all' || inputs.platform == 'macos' }}
+    if: ${{ github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'macos' }}
     runs-on: macos-latest
     timeout-minutes: 60
     permissions:
@@ -59,14 +62,23 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
-          releaseDraft: ${{ inputs.draft }}
+          releaseBody: |
+            ## LexiKeep v1.1.0
+
+            - 新增 Qwen 中国站与国际站的一键配置
+            - 新增 OpenAI、DeepSeek、OpenCode 和自定义兼容服务预设
+            - 连接后加载并列出全部可用模型，切换模型立即生效
+            - 修复云端 API 错误沿用本地 Ollama 地址的问题
+            - 修复浏览器体验模式缺少 Tauri invoke 桥接导致的连接错误
+            - 更新全平台应用图标与界面品牌展示
+          releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
           args: --target ${{ matrix.target }} --bundles app,dmg
 
   windows:
     name: Windows Installer
-    if: ${{ inputs.platform == 'all' || inputs.platform == 'windows' }}
+    if: ${{ github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'windows' }}
     runs-on: windows-latest
     timeout-minutes: 60
     permissions:
@@ -96,7 +108,16 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
-          releaseDraft: ${{ inputs.draft }}
+          releaseBody: |
+            ## LexiKeep v1.1.0
+
+            - 新增 Qwen 中国站与国际站的一键配置
+            - 新增 OpenAI、DeepSeek、OpenCode 和自定义兼容服务预设
+            - 连接后加载并列出全部可用模型，切换模型立即生效
+            - 修复云端 API 错误沿用本地 Ollama 地址的问题
+            - 修复浏览器体验模式缺少 Tauri invoke 桥接导致的连接错误
+            - 更新全平台应用图标与界面品牌展示
+          releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
           updaterJsonPreferNsis: true
@@ -104,7 +125,7 @@ jobs:
 
   linux:
     name: Linux (.deb)
-    if: ${{ inputs.platform == 'all' || inputs.platform == 'linux' }}
+    if: ${{ github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'linux' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -138,14 +159,23 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
-          releaseDraft: ${{ inputs.draft }}
+          releaseBody: |
+            ## LexiKeep v1.1.0
+
+            - 新增 Qwen 中国站与国际站的一键配置
+            - 新增 OpenAI、DeepSeek、OpenCode 和自定义兼容服务预设
+            - 连接后加载并列出全部可用模型，切换模型立即生效
+            - 修复云端 API 错误沿用本地 Ollama 地址的问题
+            - 修复浏览器体验模式缺少 Tauri invoke 桥接导致的连接错误
+            - 更新全平台应用图标与界面品牌展示
+          releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
           args: --bundles deb
 
   android:
     name: Android APK
-    if: ${{ inputs.platform == 'all' || inputs.platform == 'android' }}
+    if: ${{ github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'android' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -181,7 +211,16 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
-          releaseDraft: ${{ inputs.draft }}
+          releaseBody: |
+            ## LexiKeep v1.1.0
+
+            - 新增 Qwen 中国站与国际站的一键配置
+            - 新增 OpenAI、DeepSeek、OpenCode 和自定义兼容服务预设
+            - 连接后加载并列出全部可用模型，切换模型立即生效
+            - 修复云端 API 错误沿用本地 Ollama 地址的问题
+            - 修复浏览器体验模式缺少 Tauri invoke 桥接导致的连接错误
+            - 更新全平台应用图标与界面品牌展示
+          releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 1
           mobile: android
