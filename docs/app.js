@@ -58,11 +58,12 @@
       },
       future: {
         label: "后期功能预告",
-        title: "在 App 外阅读，也能查词和入库",
-        desc: "后期将增加插件能力：在网页或其他阅读场景中选中单词即可查看翻译，并直接保存到 LexiKeep 个人单词库。",
-        p1: "在应用外自由阅读",
-        p2: "翻译选中的单词",
-        p3: "一键保存到 LexiKeep"
+        title: "在 App 外，也能查词入库",
+        desc: "后期将支持网页划词翻译、一键存入 LexiKeep，并扩展 PDF 等更多阅读格式。",
+        p1: "应用外阅读",
+        p2: "划词翻译",
+        p3: "一键入库",
+        p4: "PDF 等格式"
       },
       workflow: {
         kicker: "怎么用",
@@ -206,11 +207,12 @@
       },
       future: {
         label: "Future features",
-        title: "Read anywhere, then save words to LexiKeep",
-        desc: "A future plugin will let you translate selected words outside the app and save them directly to your LexiKeep word library.",
-        p1: "Read outside the app",
-        p2: "Translate selected words",
-        p3: "Save to LexiKeep in one click"
+        title: "Look up and save words beyond the app",
+        desc: "Future updates will add selected-text translation, one-click saving to LexiKeep, and more reading formats including PDF.",
+        p1: "Read anywhere",
+        p2: "Translate selections",
+        p3: "Save in one click",
+        p4: "PDF and more formats"
       },
       workflow: {
         kicker: "How it works",
@@ -354,11 +356,12 @@
       },
       future: {
         label: "今後の機能予告",
-        title: "アプリの外で読んでも、単語を検索・保存",
-        desc: "今後追加予定のプラグインで、Web ページなどの単語を選択して翻訳し、そのまま LexiKeep の単語リストへ保存できるようになります。",
-        p1: "アプリの外で自由に読む",
-        p2: "選択した単語を翻訳",
-        p3: "ワンクリックで LexiKeep に保存"
+        title: "アプリの外でも、単語を検索・保存",
+        desc: "今後は選択テキストの翻訳、LexiKeep へのワンクリック保存、PDF などの読書形式に対応します。",
+        p1: "アプリ外で読む",
+        p2: "選択部分を翻訳",
+        p3: "ワンクリック保存",
+        p4: "PDF などの形式"
       },
       workflow: {
         kicker: "使い方",

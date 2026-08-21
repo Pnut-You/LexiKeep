@@ -340,7 +340,7 @@ h2 { margin: 10px 0 14px; color:var(--text); font-size:clamp(32px, 5vw, 52px); l
 .section-head p { margin:0; color:var(--muted); font-size:17px; line-height:1.7; }
 
 .feature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
-.feature-card { border:1px solid var(--border); background:var(--card); border-radius:var(--radius); padding:26px; box-shadow:0 1px 0 rgba(15,23,42,.02); }
+.feature-card { display:flex; flex-direction:column; min-height:270px; border:1px solid var(--border); background:var(--card); border-radius:var(--radius); padding:26px; box-shadow:0 1px 0 rgba(15,23,42,.02); }
 .feature-card.wide { grid-column:span 2; }
 .feature-icon { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; margin-bottom:28px; font-size:18px; }
 .feature-icon.blue { color:var(--blue-700); background:var(--blue-50); }
@@ -350,6 +350,7 @@ h2 { margin: 10px 0 14px; color:var(--text); font-size:clamp(32px, 5vw, 52px); l
 .feature-card h3 { color:var(--text); margin:0 0 10px; font-size:19px; letter-spacing:-.02em; }
 .feature-card p { margin:0; color:var(--muted); line-height:1.7; font-size:14px; }
 .lang-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:25px; }
+.feature-card > .lang-chips { margin-top:auto; padding-top:20px; }
 .lang-chip { padding:8px 11px; border:1px solid var(--border); border-radius:10px; font-size:12px; color:var(--body); background:var(--surface-solid); }
 .feature-card-label { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
 .feature-card-label .feature-icon { margin-bottom:0; flex:0 0 auto; }
@@ -516,6 +517,7 @@ footer { padding:38px 0 50px; color:var(--muted); font-size:12px; }
   .dl-dialog { padding:24px 18px 20px; }
   .feature-grid, .flow { grid-template-columns:1fr; }
   .feature-card.wide { grid-column:auto; }
+  .feature-card { min-height:0; }
   .lang-row { grid-template-columns:1fr; gap:5px; }
   .lang-row:first-child { display:none; }
   .lang-row > div:not(.lang-name):before { content:attr(data-label) "："; color:var(--faint); }
