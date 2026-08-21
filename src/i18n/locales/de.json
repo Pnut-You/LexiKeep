@@ -110,7 +110,7 @@
       "or": "oder",
       "cookieBrowser": "Quelle der YouTube-Anmelde-Cookies",
       "cookieNone": "Keine Browser-Cookies verwenden",
-      "cookieHint": "Nur auswählen, wenn YouTube eine Anmeldung oder Bot-Prüfung verlangt. LexiKeep lässt yt-dlp die lokalen Cookies des gewählten Browsers lesen; schließen Sie den Browser vorher und stellen Sie sicher, dass YouTube dort angemeldet ist."
+      "cookieHint": "Nur auswählen, wenn YouTube eine Anmeldung oder Bot-Prüfung verlangt. LexiKeep lässt yt-dlp die lokalen Cookies des gewählten Browsers lesen; schließen Sie den Browser vorher und stellen Sie sicher, dass YouTube dort angemeldet ist. Chrome-/Chromium-basierte Browser unter Linux benötigen außerdem python3-secretstorage."
     },
     "theme": {
       "title": "Oberflächenthema",

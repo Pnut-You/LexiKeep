@@ -109,7 +109,7 @@
       "or": "或",
       "cookieBrowser": "YouTube 登录 Cookie 来源",
       "cookieNone": "不使用浏览器 Cookie",
-      "cookieHint": "只有出现登录或机器人验证时才需要选择。LexiKeep 会让 yt-dlp 直接读取所选浏览器的本地 Cookie；请先关闭该浏览器，并确保其中已登录 YouTube。"
+      "cookieHint": "只有出现登录或机器人验证时才需要选择。LexiKeep 会让 yt-dlp 直接读取所选浏览器的本地 Cookie；请先关闭该浏览器，并确保其中已登录 YouTube。Linux 使用 Chrome/Chromium 系浏览器时，还需要安装 python3-secretstorage。"
     },
     "theme": {
       "title": "界面主题",

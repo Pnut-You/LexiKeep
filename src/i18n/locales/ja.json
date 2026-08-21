@@ -109,7 +109,7 @@
       "or": "または",
       "cookieBrowser": "YouTube ログイン Cookie の取得元",
       "cookieNone": "ブラウザ Cookie を使用しない",
-      "cookieHint": "ログインまたはボット確認を求められた場合のみ選択してください。LexiKeep は yt-dlp を通じて選択したブラウザのローカル Cookie を読み取ります。先にブラウザを終了し、YouTube にログイン済みであることを確認してください。"
+      "cookieHint": "ログインまたはボット確認を求められた場合のみ選択してください。LexiKeep は yt-dlp を通じて選択したブラウザのローカル Cookie を読み取ります。先にブラウザを終了し、YouTube にログイン済みであることを確認してください。Linux で Chrome/Chromium 系ブラウザを使う場合は python3-secretstorage も必要です。"
     },
     "theme": {
       "title": "表示テーマ",

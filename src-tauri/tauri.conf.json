@@ -46,6 +46,13 @@
     "macOS": {
       "signingIdentity": "-"
     },
+    "linux": {
+      "deb": {
+        "recommends": [
+          "python3-secretstorage"
+        ]
+      }
+    },
     "android": {
       "debugApplicationIdSuffix": ".debug"
     }

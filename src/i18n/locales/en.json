@@ -110,7 +110,7 @@
       "or": "or",
       "cookieBrowser": "YouTube sign-in cookie source",
       "cookieNone": "Do not use browser cookies",
-      "cookieHint": "Only select this when YouTube requests sign-in or bot verification. LexiKeep asks yt-dlp to read cookies locally from the selected browser; close the browser first and make sure it is signed in to YouTube."
+      "cookieHint": "Only select this when YouTube requests sign-in or bot verification. LexiKeep asks yt-dlp to read cookies locally from the selected browser; close the browser first and make sure it is signed in to YouTube. Chrome/Chromium-based browsers on Linux also require python3-secretstorage."
     },
     "theme": {
       "title": "Interface Theme",

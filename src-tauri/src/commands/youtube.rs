@@ -400,9 +400,19 @@ fn friendly_ytdlp_error(stderr: &str) -> String {
         }
     };
     pick(
+        &["secretstorage not available", "no module named 'secretstorage'"],
+        "已选择浏览器，但 yt-dlp 无法读取 Linux 密钥环，因此不能解密登录 Cookie。Ubuntu/Debian 请执行：sudo apt install python3-secretstorage；安装后完全关闭浏览器并重试。也可以改用已登录 YouTube 的 Firefox。",
+    )
+    .or_else(|| {
+        pick(
+            &["failed to decrypt cookie", "cannot decrypt v10 cookies", "cannot decrypt v11 cookies"],
+            "yt-dlp 已找到浏览器 Cookie，但无法用当前 Linux 密钥环解密。请确认选择了实际登录 YouTube 的浏览器、完全关闭该浏览器后重试；若使用 Chrome/Chromium，请安装 python3-secretstorage，或改用 Firefox。",
+        )
+    })
+    .or_else(|| pick(
         &["sign in to confirm you're not a bot", "not a bot", "bot check"],
         "YouTube 要求登录/机器人验证。请在「设置 → YouTube 字幕工具」中选择你已登录 YouTube 的浏览器，然后重试。",
-    )
+    ))
     .or_else(|| {
         pick(
             &["video unavailable", "this video isn't available"],
@@ -444,6 +454,12 @@ fn friendly_ytdlp_error(stderr: &str) -> String {
             .collect();
         format!("yt-dlp 出错：{}", cleaned.trim())
     })
+}
+
+fn should_skip_http_fallback(error: &str) -> bool {
+    error.contains("Linux 密钥环")
+        || error.contains("无法用当前 Linux 密钥环解密")
+        || error.contains("登录/机器人验证")
 }
 
 fn requires_browser_cookies(stderr: &str) -> bool {
@@ -727,6 +743,9 @@ pub async fn youtube_list_subs(
                 log::info!("yt-dlp 未发现字幕，尝试 HTTP 回退确认");
             }
             Err(error) => {
+                if should_skip_http_fallback(&error) {
+                    return Err(error);
+                }
                 log::warn!("yt-dlp 列字幕失败，尝试 HTTP 回退：{error}");
                 ytdlp_error = Some(error);
             }
@@ -2061,6 +2080,16 @@ mod tests {
         assert!(
             friendly_ytdlp_error("HTTP Error 403: Forbidden").contains("403")
         );
+        let secretstorage = friendly_ytdlp_error(
+            "ERROR: secretstorage not available as the `secretstorage` module is not installed. Sign in to confirm you're not a bot",
+        );
+        assert!(secretstorage.contains("python3-secretstorage"));
+        assert!(!secretstorage.contains("选择你已登录"));
+        assert!(friendly_ytdlp_error(
+            "WARNING: failed to decrypt cookie (AES-CBC) because UTF-8 decoding failed"
+        )
+        .contains("密钥环解密"));
+        assert!(should_skip_http_fallback(&secretstorage));
     }
 
     #[test]
