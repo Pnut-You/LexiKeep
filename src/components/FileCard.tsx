@@ -36,7 +36,12 @@ export default function FileCard({ file, folderPath, onDelete, onAnalyze, onCanc
         <div className="flex min-w-0 flex-1 items-start gap-3">
           <span className="shrink-0 text-2xl">{icon}</span>
           <div className="min-w-0 flex-1">
-            <h3 className="break-words font-medium text-gray-900 text-sm" title={file.name}>{file.name}</h3>
+            <h3
+              className="line-clamp-2 text-sm font-medium leading-5 text-gray-900 [overflow-wrap:anywhere]"
+              title={file.name}
+            >
+              {file.name}
+            </h3>
             <p className="text-xs text-gray-500 mt-0.5">
               {file.type.toUpperCase()} · {t('fileCard.segments', { count: file.segment_count })} · {date}
             </p>
