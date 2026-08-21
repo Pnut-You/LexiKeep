@@ -60,7 +60,9 @@ export const useReaderStore = create<ReaderStore>((set) => ({
     set({ loading: true });
     try {
       const segments: Segment[] = await invoke('get_file_segments', { fileId });
-      const files: { id: number; language: Language }[] = await invoke('list_files');
+      const files: { id: number; language: Language }[] = await invoke('list_files', {
+        includeAllFolders: true,
+      });
       const currentLanguage = files.find((file) => file.id === fileId)?.language ?? 'en';
 
       const allWords: WordStatusInfo[] = await invoke('list_words', {

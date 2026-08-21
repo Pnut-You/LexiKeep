@@ -78,8 +78,13 @@ export default function ReadingPage() {
   } | null>(null);
 
   useEffect(() => {
-    invoke<FileRecord[]>('list_files').then(setFiles);
-  }, []);
+    invoke<FileRecord[]>('list_files', { includeAllFolders: true })
+      .then(setFiles)
+      .catch((error) => {
+        console.error('Failed to load reading files:', error);
+        useFeedbackStore.getState().show(t('reading.cannotLoadFiles'), 'error');
+      });
+  }, [t]);
 
   const visibleFiles = globalLanguage === 'all'
     ? files
