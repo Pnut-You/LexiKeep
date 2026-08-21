@@ -63,11 +63,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.6
+            ## LexiKeep v1.1.7
 
-            - 修复取消 YouTube 下载或 AI 翻译后状态未清理、无法再次操作的问题
-            - AI 字幕翻译改为更小批次，并显示批次与字幕段落进度
-            - 缩短单批 AI 请求超时，忽略已结束任务迟到的进度事件
+            - 修复阅读页无法从下拉列表选择文件夹内文件的问题
+            - 删除文件时自动清理不再被其他文件引用的单词
+            - 其他文件仍在使用的单词会保留其学习状态、释义和复习记录
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -106,11 +106,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.6
+            ## LexiKeep v1.1.7
 
-            - 修复取消 YouTube 下载或 AI 翻译后状态未清理、无法再次操作的问题
-            - AI 字幕翻译改为更小批次，并显示批次与字幕段落进度
-            - 缩短单批 AI 请求超时，忽略已结束任务迟到的进度事件
+            - 修复阅读页无法从下拉列表选择文件夹内文件的问题
+            - 删除文件时自动清理不再被其他文件引用的单词
+            - 其他文件仍在使用的单词会保留其学习状态、释义和复习记录
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -154,11 +154,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.6
+            ## LexiKeep v1.1.7
 
-            - 修复取消 YouTube 下载或 AI 翻译后状态未清理、无法再次操作的问题
-            - AI 字幕翻译改为更小批次，并显示批次与字幕段落进度
-            - 缩短单批 AI 请求超时，忽略已结束任务迟到的进度事件
+            - 修复阅读页无法从下拉列表选择文件夹内文件的问题
+            - 删除文件时自动清理不再被其他文件引用的单词
+            - 其他文件仍在使用的单词会保留其学习状态、释义和复习记录
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -203,11 +203,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.6
+            ## LexiKeep v1.1.7
 
-            - 修复取消 YouTube 下载或 AI 翻译后状态未清理、无法再次操作的问题
-            - AI 字幕翻译改为更小批次，并显示批次与字幕段落进度
-            - 缩短单批 AI 请求超时，忽略已结束任务迟到的进度事件
+            - 修复阅读页无法从下拉列表选择文件夹内文件的问题
+            - 删除文件时自动清理不再被其他文件引用的单词
+            - 其他文件仍在使用的单词会保留其学习状态、释义和复习记录
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 1
