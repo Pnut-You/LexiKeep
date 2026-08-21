@@ -225,16 +225,18 @@ fn ai_client(timeout: std::time::Duration, base_url: &str) -> Result<Client, Str
         .map_err(|error| error.to_string())
 }
 
-fn batch_ranges(segments: &[(i32, String)]) -> Vec<(usize, usize)> {
-    const MAX_SEGMENTS: usize = 30;
-    const MAX_INPUT_CHARS: usize = 12_000;
+fn batch_ranges_with_limits(
+    segments: &[(i32, String)],
+    max_segments: usize,
+    max_input_chars: usize,
+) -> Vec<(usize, usize)> {
     let mut ranges = Vec::new();
     let mut start = 0;
     let mut input_chars = 0;
 
     for (index, (_, text)) in segments.iter().enumerate() {
         let next_chars = input_chars + text.chars().count() + 16;
-        if index > start && (index - start >= MAX_SEGMENTS || next_chars > MAX_INPUT_CHARS) {
+        if index > start && (index - start >= max_segments || next_chars > max_input_chars) {
             ranges.push((start, index));
             start = index;
             input_chars = 0;
@@ -246,6 +248,14 @@ fn batch_ranges(segments: &[(i32, String)]) -> Vec<(usize, usize)> {
         ranges.push((start, segments.len()));
     }
     ranges
+}
+
+fn batch_ranges(segments: &[(i32, String)]) -> Vec<(usize, usize)> {
+    batch_ranges_with_limits(segments, 30, 12_000)
+}
+
+fn translation_batch_ranges(segments: &[(i32, String)]) -> Vec<(usize, usize)> {
+    batch_ranges_with_limits(segments, 12, 4_000)
 }
 
 fn de_i32_flexible<'de, D>(deserializer: D) -> Result<i32, D::Error>
@@ -891,7 +901,7 @@ pub async fn translate_segments(
         .map(|s| (s.index, s.text.clone()))
         .collect();
     let total_segments = pairs.len();
-    let ranges = batch_ranges(&pairs);
+    let ranges = translation_batch_ranges(&pairs);
     let total_batches = ranges.len();
     let _ = app.emit(
         "translate-progress",
@@ -906,7 +916,7 @@ pub async fn translate_segments(
         }),
     );
 
-    let client = ai_client(std::time::Duration::from_secs(600), &config.base_url)?;
+    let client = ai_client(std::time::Duration::from_secs(180), &config.base_url)?;
     let schema = translation_schema();
     let mut by_index: HashMap<i32, String> = HashMap::new();
 
@@ -1313,6 +1323,20 @@ pub async fn analyze_file_phrases(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn translation_batches_report_progress_frequently() {
+        let segments = (0..25)
+            .map(|index| (index, "short subtitle".to_string()))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            translation_batch_ranges(&segments),
+            vec![(0, 12), (12, 24), (24, 25)]
+        );
+
+        let long_segments = vec![(0, "a".repeat(3_000)), (1, "b".repeat(2_000))];
+        assert_eq!(translation_batch_ranges(&long_segments), vec![(0, 1), (1, 2)]);
+    }
 
     #[test]
     fn repair_handles_malformed_phrase_json() {

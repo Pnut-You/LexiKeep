@@ -47,14 +47,14 @@ export default function YouTubeDialog({ onClose }: YouTubeDialogProps) {
   const [language, setLanguage] = useState<Language | ''>('');
   const [aiTranslate, setAiTranslate] = useState(false);
   const [error, setError] = useState('');
+  const [cancelling, setCancelling] = useState(false);
 
   const aiEnabled = useAiStore((state) => state.enabled);
   const translateProgress = useYoutubeStore((state) => state.translateProgress);
   const downloadProgress = useYoutubeStore((state) => state.downloadProgress);
   const listSubs = useYoutubeStore((state) => state.listSubs);
-  const cancelTranslate = useYoutubeStore((state) => state.cancelTranslate);
-  const cancelJob = useYoutubeStore((state) => state.cancelJob);
   const importFromYouTube = useFileStore((state) => state.importFromYouTube);
+  const cancelYoutubeImport = useFileStore((state) => state.cancelYoutubeImport);
   const importing = useFileStore((state) => state.importingYouTube);
   const youtubePhase = useFileStore((state) => state.youtubePhase);
 
@@ -96,7 +96,7 @@ export default function YouTubeDialog({ onClose }: YouTubeDialogProps) {
     selected.some((t) => t.lang === track.lang && t.is_auto === track.is_auto);
 
   const handleImport = async () => {
-    if (selected.length === 0 || !language) return;
+    if (selected.length === 0 || !language || importing) return;
     setError('');
     setStep('running');
     try {
@@ -120,16 +120,22 @@ export default function YouTubeDialog({ onClose }: YouTubeDialogProps) {
         setError(message);
         setStep('select');
       }
+    } finally {
+      setCancelling(false);
     }
   };
 
-  const handleCancelRunning = () => {
-    if (activeDownload) {
-      void cancelJob(activeDownload.jobId);
-    } else if (activeJob) {
-      void cancelTranslate(activeJob.jobId);
-    } else {
-      onClose();
+  const handleCancelRunning = async (closeAfter = false) => {
+    if (cancelling) return;
+    setCancelling(true);
+    try {
+      await cancelYoutubeImport();
+      if (closeAfter) onClose();
+    } catch (e) {
+      setError(String(e));
+      setStep('select');
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -168,7 +174,14 @@ export default function YouTubeDialog({ onClose }: YouTubeDialogProps) {
             <h3 className="text-lg font-semibold text-gray-900">{t('youtube.title')}</h3>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => {
+              if (step === 'running') {
+                void handleCancelRunning(true);
+              } else {
+                onClose();
+              }
+            }}
+            disabled={cancelling}
             aria-label={t('youtube.closeAria')}
             className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
           >
@@ -291,13 +304,18 @@ export default function YouTubeDialog({ onClose }: YouTubeDialogProps) {
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
                     <div
-                      className="h-full rounded-full bg-purple-600 transition-all"
-                      style={{ width: `${activeJob.percent}%` }}
+                      className={`h-full rounded-full bg-purple-600 transition-all ${activeJob.percent === 0 ? 'animate-pulse' : ''}`}
+                      style={{ width: `${Math.max(2, activeJob.percent)}%` }}
                     />
                   </div>
                   <p className="text-xs text-gray-400">
                     {t('youtube.segmentsProgress', { processed: activeJob.processedSegments, total: activeJob.totalSegments })}
                   </p>
+                  {activeJob.completedBatches !== undefined && activeJob.totalBatches !== undefined && (
+                    <p className="text-xs text-gray-400">
+                      {t('youtube.batchesProgress', { current: Math.min(activeJob.completedBatches + 1, activeJob.totalBatches), total: activeJob.totalBatches })}
+                    </p>
+                  )}
                 </>
               ) : (
                 <>
@@ -341,7 +359,7 @@ export default function YouTubeDialog({ onClose }: YouTubeDialogProps) {
               {step === 'select' && (
                 <button
                   onClick={() => void handleImport()}
-                  disabled={selected.length === 0 || !language}
+                  disabled={selected.length === 0 || !language || importing || cancelling}
                   className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
                 >
                   {t('youtube.downloadImport')}
@@ -351,11 +369,11 @@ export default function YouTubeDialog({ onClose }: YouTubeDialogProps) {
           )}
           {step === 'running' && (
             <button
-              onClick={handleCancelRunning}
-              disabled={!activeDownload && !activeJob && !importing}
+              onClick={() => void handleCancelRunning(false)}
+              disabled={cancelling}
               className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40"
             >
-              {activeDownload || activeJob ? t('youtube.cancel') : t('youtube.close')}
+              {cancelling ? t('youtube.cancelling') : t('youtube.cancel')}
             </button>
           )}
         </div>

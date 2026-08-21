@@ -13,7 +13,7 @@ import { useYoutubeStore } from './youtubeStore';
 import { useFeedbackStore } from './feedbackStore';
 import { usePreferencesStore } from './preferencesStore';
 import i18n from '../i18n';
-import { isCancelledError } from '../lib/errors';
+import { ERR_CANCELLED, isCancelledError } from '../lib/errors';
 import { extractPdfText, PdfNoTextError } from '../lib/pdf';
 
 type ImportFileType = 'txt' | 'srt' | 'pdf';
@@ -31,6 +31,28 @@ interface PendingImport {
 }
 
 export type YoutubePhase = 'downloading' | 'parsing' | 'translating' | 'importing';
+
+interface YoutubeImportRun {
+  cancelled: boolean;
+  jobId: number | null;
+  jobKind: 'download' | 'translate' | null;
+  finished: Promise<void>;
+  finish: () => void;
+}
+
+let activeYoutubeImportRun: YoutubeImportRun | null = null;
+
+function createYoutubeImportRun(): YoutubeImportRun {
+  let finish = () => {};
+  const finished = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  return { cancelled: false, jobId: null, jobKind: null, finished, finish };
+}
+
+function ensureYoutubeImportActive(run: YoutubeImportRun): void {
+  if (run.cancelled) throw new Error(ERR_CANCELLED);
+}
 
 function sanitizeFileName(title: string): string {
   const cleaned = Array.from(title)
@@ -78,6 +100,7 @@ interface FileStore {
     aiTranslate: boolean;
     config: AiConfig;
   }) => Promise<void>;
+  cancelYoutubeImport: () => Promise<void>;
 }
 
 interface JapaneseToken {
@@ -476,26 +499,40 @@ export const useFileStore = create<FileStore>((set, get) => ({
   },
 
   importFromYouTube: async ({ url, title, primary, secondary, language, aiTranslate, config }) => {
+    if (activeYoutubeImportRun) return;
+    const run = createYoutubeImportRun();
+    activeYoutubeImportRun = run;
     set({ importingYouTube: true, youtubePhase: 'downloading' });
     try {
       const youtube = useYoutubeStore.getState();
       const jobId = nextJobId();
+      run.jobId = jobId;
+      run.jobKind = 'download';
       const sub = secondary
         ? await youtube.mergeSubs(jobId, url, primary, secondary)
         : await youtube.downloadSub(jobId, url, primary.lang, primary.is_auto);
+      run.jobId = null;
+      run.jobKind = null;
+      ensureYoutubeImportActive(run);
 
       set({ youtubePhase: 'parsing' });
       let parsed = await parseContent(sub.content, 'srt', language);
+      ensureYoutubeImportActive(run);
 
       if (aiTranslate) {
         set({ youtubePhase: 'translating' });
         const translateJobId = nextJobId();
+        run.jobId = translateJobId;
+        run.jobKind = 'translate';
         const translations = await youtube.translateSegments(
           translateJobId,
           language,
           parsed.segments.map((segment) => ({ index: segment.index, text: segment.en_text })),
           config,
         );
+        run.jobId = null;
+        run.jobKind = null;
+        ensureYoutubeImportActive(run);
         const map = new Map(translations.map((t) => [t.index, t.translation]));
         parsed = {
           ...parsed,
@@ -508,7 +545,9 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
       set({ youtubePhase: 'importing' });
       const hash = await computeHash(sub.content);
+      ensureYoutubeImportActive(run);
       const duplicate: { file_id: number; name: string } | null = await invoke('check_duplicate', { hash });
+      ensureYoutubeImportActive(run);
       let replaceFileId: number | null = null;
       let replaceFileName: string | null = null;
       if (duplicate) {
@@ -518,6 +557,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
           okLabel: i18n.t('fileStore.overwrite'),
           cancelLabel: i18n.t('common.cancel'),
         });
+        ensureYoutubeImportActive(run);
         if (!confirmed) return;
         replaceFileId = duplicate.file_id;
         replaceFileName = duplicate.name;
@@ -546,7 +586,29 @@ export const useFileStore = create<FileStore>((set, get) => ({
       }
       throw e;
     } finally {
+      run.finish();
+      if (activeYoutubeImportRun === run) activeYoutubeImportRun = null;
       set({ importingYouTube: false, youtubePhase: null });
+    }
+  },
+
+  cancelYoutubeImport: async () => {
+    const run = activeYoutubeImportRun;
+    if (!run) return;
+    run.cancelled = true;
+    const jobId = run.jobId;
+    const jobKind = run.jobKind;
+    try {
+      if (jobId !== null) {
+        const youtube = useYoutubeStore.getState();
+        if (jobKind === 'translate') {
+          await youtube.cancelTranslate(jobId);
+        } else if (jobKind === 'download') {
+          await youtube.cancelJob(jobId);
+        }
+      }
+    } finally {
+      await run.finished;
     }
   },
 

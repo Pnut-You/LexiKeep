@@ -49,6 +49,8 @@ export interface TranslateProgress {
   processedSegments: number;
   totalSegments: number;
   percent: number;
+  completedBatches?: number;
+  totalBatches?: number;
 }
 
 export interface DownloadProgress {
@@ -78,6 +80,8 @@ interface YoutubeStore {
 }
 
 let initialized = false;
+const activeTranslateJobs = new Set<number>();
+const activeDownloadJobs = new Set<number>();
 
 export const useYoutubeStore = create<YoutubeStore>((set) => ({
   translateProgress: {},
@@ -87,11 +91,13 @@ export const useYoutubeStore = create<YoutubeStore>((set) => ({
     if (initialized) return;
     initialized = true;
     await listen<TranslateProgress>('translate-progress', (event) => {
+      if (!activeTranslateJobs.has(event.payload.jobId)) return;
       set((state) => ({
         translateProgress: { ...state.translateProgress, [event.payload.jobId]: event.payload },
       }));
     });
     await listen<DownloadProgress>('youtube-progress', (event) => {
+      if (!activeDownloadJobs.has(event.payload.jobId)) return;
       set((state) => ({
         downloadProgress: { ...state.downloadProgress, [event.payload.jobId]: event.payload },
       }));
@@ -101,6 +107,7 @@ export const useYoutubeStore = create<YoutubeStore>((set) => ({
   listSubs: async (url) => invoke('youtube_list_subs', { url, cookieBrowser: selectedCookieBrowser() }),
 
   downloadSub: async (jobId, url, lang, isAuto) => {
+    activeDownloadJobs.add(jobId);
     set((state) => ({
       downloadProgress: {
         ...state.downloadProgress,
@@ -122,6 +129,7 @@ export const useYoutubeStore = create<YoutubeStore>((set) => ({
         cookieBrowser: selectedCookieBrowser(),
       });
     } finally {
+      activeDownloadJobs.delete(jobId);
       set((state) => {
         const downloadProgress = { ...state.downloadProgress };
         delete downloadProgress[jobId];
@@ -131,6 +139,7 @@ export const useYoutubeStore = create<YoutubeStore>((set) => ({
   },
 
   mergeSubs: async (jobId, url, primary, secondary) => {
+    activeDownloadJobs.add(jobId);
     set((state) => ({
       downloadProgress: {
         ...state.downloadProgress,
@@ -152,6 +161,7 @@ export const useYoutubeStore = create<YoutubeStore>((set) => ({
         cookieBrowser: selectedCookieBrowser(),
       });
     } finally {
+      activeDownloadJobs.delete(jobId);
       set((state) => {
         const downloadProgress = { ...state.downloadProgress };
         delete downloadProgress[jobId];
@@ -165,6 +175,7 @@ export const useYoutubeStore = create<YoutubeStore>((set) => ({
   },
 
   translateSegments: async (jobId, language, segments, config) => {
+    activeTranslateJobs.add(jobId);
     set((state) => ({
       translateProgress: {
         ...state.translateProgress,
@@ -185,6 +196,7 @@ export const useYoutubeStore = create<YoutubeStore>((set) => ({
         segments,
       });
     } finally {
+      activeTranslateJobs.delete(jobId);
       set((state) => {
         const translateProgress = { ...state.translateProgress };
         delete translateProgress[jobId];
