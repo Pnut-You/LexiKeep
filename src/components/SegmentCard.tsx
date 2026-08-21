@@ -20,6 +20,7 @@ interface SegmentCardProps {
   onWordClick: (lemma: string, wordId: number | null) => void;
   onWordContextMenu: (lemma: string, wordId: number | null, x: number, y: number) => void;
   onPhraseClick?: (phraseId: number, text: string) => void;
+  onPhraseContextMenu?: (phrase: SegmentPhrase, x: number, y: number) => void;
   showTranslation?: boolean;
   highlightQuery?: string;
   isActive?: boolean;
@@ -80,6 +81,7 @@ export default function SegmentCard({
   onWordClick,
   onWordContextMenu,
   onPhraseClick,
+  onPhraseContextMenu,
   showTranslation = true,
   highlightQuery = '',
   isActive = false,
@@ -114,6 +116,12 @@ export default function SegmentCard({
             <span
               key={i}
               onClick={() => onPhraseClick(phrase.phrase_id, phrase.text)}
+              onContextMenu={(event) => {
+                if (!onPhraseContextMenu) return;
+                event.preventDefault();
+                event.stopPropagation();
+                onPhraseContextMenu(phrase, event.clientX, event.clientY);
+              }}
               className={`cursor-pointer rounded-sm underline decoration-dotted ${
                 phrase.status === 'learning'
                   ? 'text-purple-700 font-medium bg-purple-50/60'

@@ -4,6 +4,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from 'react-i18next';
 import { Search, X, MoreHorizontal } from 'lucide-react';
 import { useReaderStore } from '../stores/readerStore';
+import type { SegmentPhrase } from '../stores/readerStore';
 import { usePreferencesStore } from '../stores/preferencesStore';
 import { useFeedbackStore } from '../stores/feedbackStore';
 import type { FileRecord, WordStatus } from '../lib/types';
@@ -70,12 +71,24 @@ export default function ReadingPage() {
       document.removeEventListener('keydown', keyHandler);
     };
   }, [toolsOpen]);
-  const [contextMenu, setContextMenu] = useState<{
-    x: number; y: number;
-    lemma: string;
-    wordId: number | null;
-    status: WordStatus;
-  } | null>(null);
+  const [contextMenu, setContextMenu] = useState<
+    | {
+      kind: 'word';
+      x: number;
+      y: number;
+      lemma: string;
+      wordId: number | null;
+      status: WordStatus;
+    }
+    | {
+      kind: 'phrase';
+      x: number;
+      y: number;
+      phraseId: number;
+      status: WordStatus;
+    }
+    | null
+  >(null);
 
   useEffect(() => {
     invoke<FileRecord[]>('list_files', { includeAllFolders: true })
@@ -208,11 +221,52 @@ export default function ReadingPage() {
     const status = wordId !== null
       ? ((wordStatusMap.get(lemma)?.status ?? 'unprocessed') as WordStatus)
       : 'unprocessed' as WordStatus;
-    setContextMenu({ x, y, lemma, wordId, status });
+    setContextMenu({ kind: 'word', x, y, lemma, wordId, status });
+  };
+
+  const updatePhraseStatus = async (phraseId: number, status: WordStatus) => {
+    try {
+      await invoke('update_phrase_status', { phraseId, status });
+      if (status === 'learning') {
+        await invoke('create_phrase_review_card', { phraseId });
+      }
+      useReaderStore.setState((state) => {
+        const nextPhraseMap = new Map<number, SegmentPhrase[]>();
+        for (const [segmentIndex, phraseList] of state.phraseMap) {
+          nextPhraseMap.set(
+            segmentIndex,
+            phraseList.map((phrase) => phrase.phrase_id === phraseId ? { ...phrase, status } : phrase),
+          );
+        }
+        return { phraseMap: nextPhraseMap };
+      });
+      setPhraseDetail((current) => current?.phrase.id === phraseId
+        ? { ...current, phrase: { ...current.phrase, status } }
+        : current);
+      useFeedbackStore.getState().show(t(`statusAction.${status}`), 'success');
+    } catch (error) {
+      console.error('Failed to update phrase:', error);
+      useFeedbackStore.getState().show(t('errors.statusUpdateFailed'), 'error');
+    }
+  };
+
+  const handlePhraseContextMenu = (phrase: SegmentPhrase, x: number, y: number) => {
+    setContextMenu({
+      kind: 'phrase',
+      x,
+      y,
+      phraseId: phrase.phrase_id,
+      status: phrase.status as WordStatus,
+    });
   };
 
   const handleContextAction = async (status: WordStatus) => {
     if (!contextMenu) return;
+    if (contextMenu.kind === 'phrase') {
+      await updatePhraseStatus(contextMenu.phraseId, status);
+      setContextMenu(null);
+      return;
+    }
     const { lemma, wordId } = contextMenu;
 
     if (wordId !== null) {
@@ -536,6 +590,7 @@ export default function ReadingPage() {
                   onWordClick={handleWordClick}
                   onWordContextMenu={handleWordContextMenu}
                   onPhraseClick={(phraseId) => handlePhraseClick(phraseId)}
+                  onPhraseContextMenu={handlePhraseContextMenu}
                    showTranslation={showTranslation}
                   highlightQuery={searchQuery}
                   isActive={index === activeSegmentIndex || index === matchingSegmentIndexes[activeMatchIndex]}
@@ -593,13 +648,7 @@ export default function ReadingPage() {
               detail={phraseDetail}
               onClose={() => setPhraseDetail(null)}
               onStatusChange={async (phraseId, status) => {
-                await invoke('update_phrase_status', { phraseId, status });
-                if (status === 'learning') {
-                  await invoke('create_phrase_review_card', { phraseId });
-                }
-                setPhraseDetail((current) => current
-                  ? { ...current, phrase: { ...current.phrase, status } }
-                  : current);
+                await updatePhraseStatus(phraseId, status);
               }}
               onDefinitionSave={async (phraseId, definition) => {
                 await invoke('update_phrase_definition', { phraseId, definition });

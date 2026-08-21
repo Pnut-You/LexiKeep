@@ -66,8 +66,10 @@ jobs:
             ## LexiKeep v1.1.7
 
             - 修复阅读页无法从下拉列表选择文件夹内文件的问题
+            - 阅读页中带下划线的词组现在支持右键快速修改状态
             - 删除文件时自动清理不再被其他文件引用的单词
             - 其他文件仍在使用的单词会保留其学习状态、释义和复习记录
+            - Linux、macOS 和 Windows 支持应用内检查、安装更新并自动重启
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -109,8 +111,10 @@ jobs:
             ## LexiKeep v1.1.7
 
             - 修复阅读页无法从下拉列表选择文件夹内文件的问题
+            - 阅读页中带下划线的词组现在支持右键快速修改状态
             - 删除文件时自动清理不再被其他文件引用的单词
             - 其他文件仍在使用的单词会保留其学习状态、释义和复习记录
+            - Linux、macOS 和 Windows 支持应用内检查、安装更新并自动重启
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -157,8 +161,10 @@ jobs:
             ## LexiKeep v1.1.7
 
             - 修复阅读页无法从下拉列表选择文件夹内文件的问题
+            - 阅读页中带下划线的词组现在支持右键快速修改状态
             - 删除文件时自动清理不再被其他文件引用的单词
             - 其他文件仍在使用的单词会保留其学习状态、释义和复习记录
+            - Linux、macOS 和 Windows 支持应用内检查、安装更新并自动重启
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -206,10 +212,71 @@ jobs:
             ## LexiKeep v1.1.7
 
             - 修复阅读页无法从下拉列表选择文件夹内文件的问题
+            - 阅读页中带下划线的词组现在支持右键快速修改状态
             - 删除文件时自动清理不再被其他文件引用的单词
             - 其他文件仍在使用的单词会保留其学习状态、释义和复习记录
+            - Linux、macOS 和 Windows 支持应用内检查、安装更新并自动重启
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 1
           mobile: android
           args: --apk --target aarch64
+
+  finalize-updater-manifest:
+    name: Finalize desktop updater manifest
+    needs: [macos, windows, linux, android]
+    if: ${{ always() && !cancelled() && needs.macos.result != 'failure' && needs.windows.result != 'failure' && needs.linux.result != 'failure' && needs.android.result != 'failure' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download generated updater manifest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(jq -r '.version' src-tauri/tauri.conf.json)
+          for attempt in 1 2 3 4 5; do
+            gh release download "v${version}" --repo "$GITHUB_REPOSITORY" --pattern latest.json --clobber && break
+            sleep 5
+          done
+          test -s latest.json
+      - name: Replace API asset URLs with signed installer download URLs
+        run: |
+          version=$(jq -r '.version' latest.json)
+          tag="v${version}"
+          base="https://github.com/${GITHUB_REPOSITORY}/releases/download/${tag}"
+          jq \
+            --arg version "$version" \
+            --arg linux "$base/LexiKeep_${version}_amd64.deb" \
+            --arg mac_arm "$base/LexiKeep_${version}_aarch64.app.tar.gz" \
+            --arg mac_intel "$base/LexiKeep_${version}_x64.app.tar.gz" \
+            --arg windows "$base/LexiKeep_${version}_x64-setup.exe" \
+            '
+              .platforms |= with_entries(
+                .value.url = (
+                  if (.key | startswith("linux-")) then $linux
+                  elif (.key | startswith("darwin-aarch64")) then $mac_arm
+                  elif (.key | startswith("darwin-x86_64")) then $mac_intel
+                  elif (.key | startswith("windows-x86_64")) then $windows
+                  else .value.url
+                  end
+                )
+              )
+              | select(.version == $version)
+            ' latest.json > latest.fixed.json
+          test -s latest.fixed.json
+          jq -e --arg prefix "$base/" '
+            [.platforms | to_entries[]
+              | select(.key | test("^(linux|darwin|windows)-"))
+              | .value.url
+              | startswith($prefix)] as $valid
+            | ($valid | length > 0) and ($valid | all)
+          ' latest.fixed.json
+          mv latest.fixed.json latest.json
+      - name: Publish finalized updater manifest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(jq -r '.version' latest.json)
+          gh release upload "v${version}" latest.json --repo "$GITHUB_REPOSITORY" --clobber
