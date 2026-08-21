@@ -68,7 +68,7 @@
       document.documentElement.dataset.theme = t;
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=20260821-2" />
+  <link rel="stylesheet" href="styles.css?v=20260821-3" />
 </head>
 <body>
   <div class="nav-wrap">
@@ -352,15 +352,20 @@
             <h3 data-i18n="f5.title">Your data stays on your computer</h3>
             <p data-i18n="f5.desc">Everything is saved locally. No account, no sign-up, nothing uploaded unless you say so.</p>
           </article>
-          <article class="feature-card wide reveal">
+          <article class="feature-card reveal">
             <div class="feature-icon violet">✦</div>
-            <h3 data-i18n="f6.title">AI is optional — everything works without it</h3>
+            <h3 data-i18n="f6.title">AI is optional, not required</h3>
             <p data-i18n="f6.desc">Import, read, look up words, save them and review without AI. Turn it on only when you want extra explanations or translations.</p>
           </article>
-          <article class="feature-card reveal">
-            <div class="feature-icon blue">↗</div>
+          <article class="feature-card wide reveal">
+            <div class="feature-card-label"><div class="feature-icon blue">↗</div><span data-i18n="future.label">Future features</span></div>
             <h3 data-i18n="future.title">Read anywhere, then save words to LexiKeep</h3>
             <p data-i18n="future.desc">A future plugin will let you translate selected words outside the app and save them directly to your LexiKeep word library.</p>
+            <div class="lang-chips future-chips">
+              <span class="lang-chip"><b>01</b><span data-i18n="future.p1">Read outside the app</span></span>
+              <span class="lang-chip"><b>02</b><span data-i18n="future.p2">Translate selected words</span></span>
+              <span class="lang-chip"><b>03</b><span data-i18n="future.p3">Save to LexiKeep in one click</span></span>
+            </div>
           </article>
         </div>
       </div>
@@ -534,6 +539,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260821-2"></script>
+  <script src="app.js?v=20260821-3"></script>
 </body>
 </html>

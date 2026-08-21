@@ -53,12 +53,16 @@
       f4: { title: "词典装进应用里", desc: "英、日、德、中四种语言的离线词典随应用内置，断网也能查。" },
       f5: { title: "数据留在你的电脑上", desc: "学习记录保存在本机，不用注册账号，也不需要把内容上传。" },
       f6: {
-        title: "AI 可选，不用 AI 也能完整使用",
+        title: "AI 是可选项，不是必须项",
         desc: "LexiKeep 的导入、阅读、查词、单词入库和复习都不依赖 AI。只有需要额外的段落解释或翻译时才开启，默认关闭。"
       },
       future: {
+        label: "后期功能预告",
         title: "在 App 外阅读，也能查词和入库",
-        desc: "后期将增加插件能力：在网页或其他阅读场景中选中单词即可查看翻译，并直接保存到 LexiKeep 个人单词库。"
+        desc: "后期将增加插件能力：在网页或其他阅读场景中选中单词即可查看翻译，并直接保存到 LexiKeep 个人单词库。",
+        p1: "在应用外自由阅读",
+        p2: "翻译选中的单词",
+        p3: "一键保存到 LexiKeep"
       },
       workflow: {
         kicker: "怎么用",
@@ -197,12 +201,16 @@
       f4: { title: "Dictionaries built into the app", desc: "Offline dictionaries for English, Japanese, German and Chinese. Look words up with no internet at all." },
       f5: { title: "Your data stays on your computer", desc: "Everything is saved locally. No account, no sign-up, nothing uploaded unless you say so." },
       f6: {
-        title: "AI is optional — everything works without it",
+        title: "AI is optional, not required",
         desc: "Import, read, look up words, save them and review without AI. Turn it on only when you want extra explanations or translations."
       },
       future: {
+        label: "Future features",
         title: "Read anywhere, then save words to LexiKeep",
-        desc: "A future plugin will let you translate selected words outside the app and save them directly to your LexiKeep word library."
+        desc: "A future plugin will let you translate selected words outside the app and save them directly to your LexiKeep word library.",
+        p1: "Read outside the app",
+        p2: "Translate selected words",
+        p3: "Save to LexiKeep in one click"
       },
       workflow: {
         kicker: "How it works",
@@ -341,12 +349,16 @@
       f4: { title: "辞書はアプリに内蔵", desc: "英語・日本語・ドイツ語・中国語のオフライン辞書を内蔵。インターネットなしでも調べられます。" },
       f5: { title: "データは自分のコンピューターに", desc: "すべてローカルに保存。アカウント不要、許可なくアップロードされることもありません。" },
       f6: {
-        title: "AI は任意。使わなくてもすべて利用可能",
+        title: "AI は任意で、必須ではありません",
         desc: "インポート・読書・辞書検索・単語保存・復習は AI なしですべて利用できます。追加の説明や翻訳が必要なときだけ有効にできます。"
       },
       future: {
+        label: "今後の機能予告",
         title: "アプリの外で読んでも、単語を検索・保存",
-        desc: "今後追加予定のプラグインで、Web ページなどの単語を選択して翻訳し、そのまま LexiKeep の単語リストへ保存できるようになります。"
+        desc: "今後追加予定のプラグインで、Web ページなどの単語を選択して翻訳し、そのまま LexiKeep の単語リストへ保存できるようになります。",
+        p1: "アプリの外で自由に読む",
+        p2: "選択した単語を翻訳",
+        p3: "ワンクリックで LexiKeep に保存"
       },
       workflow: {
         kicker: "使い方",
