@@ -63,11 +63,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.5
+            ## LexiKeep v1.1.6
 
-            - 优化长文件名展示：加宽文件卡片、限制为两行并支持悬停查看完整名称
-            - 修复 Linux 下 Chrome/Chromium 登录 Cookie 无法解密时的错误提示与无效 HTTP 回退
-            - Linux `.deb` 推荐安装 `python3-secretstorage`，帮助 yt-dlp 读取浏览器登录 Cookie
+            - 修复取消 YouTube 下载或 AI 翻译后状态未清理、无法再次操作的问题
+            - AI 字幕翻译改为更小批次，并显示批次与字幕段落进度
+            - 缩短单批 AI 请求超时，忽略已结束任务迟到的进度事件
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -106,11 +106,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.5
+            ## LexiKeep v1.1.6
 
-            - 优化长文件名展示：加宽文件卡片、限制为两行并支持悬停查看完整名称
-            - 修复 Linux 下 Chrome/Chromium 登录 Cookie 无法解密时的错误提示与无效 HTTP 回退
-            - Linux `.deb` 推荐安装 `python3-secretstorage`，帮助 yt-dlp 读取浏览器登录 Cookie
+            - 修复取消 YouTube 下载或 AI 翻译后状态未清理、无法再次操作的问题
+            - AI 字幕翻译改为更小批次，并显示批次与字幕段落进度
+            - 缩短单批 AI 请求超时，忽略已结束任务迟到的进度事件
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -154,11 +154,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.5
+            ## LexiKeep v1.1.6
 
-            - 优化长文件名展示：加宽文件卡片、限制为两行并支持悬停查看完整名称
-            - 修复 Linux 下 Chrome/Chromium 登录 Cookie 无法解密时的错误提示与无效 HTTP 回退
-            - Linux `.deb` 推荐安装 `python3-secretstorage`，帮助 yt-dlp 读取浏览器登录 Cookie
+            - 修复取消 YouTube 下载或 AI 翻译后状态未清理、无法再次操作的问题
+            - AI 字幕翻译改为更小批次，并显示批次与字幕段落进度
+            - 缩短单批 AI 请求超时，忽略已结束任务迟到的进度事件
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 2
@@ -203,11 +203,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.5
+            ## LexiKeep v1.1.6
 
-            - 优化长文件名展示：加宽文件卡片、限制为两行并支持悬停查看完整名称
-            - 修复 Linux 下 Chrome/Chromium 登录 Cookie 无法解密时的错误提示与无效 HTTP 回退
-            - Linux `.deb` 推荐安装 `python3-secretstorage`，帮助 yt-dlp 读取浏览器登录 Cookie
+            - 修复取消 YouTube 下载或 AI 翻译后状态未清理、无法再次操作的问题
+            - AI 字幕翻译改为更小批次，并显示批次与字幕段落进度
+            - 缩短单批 AI 请求超时，忽略已结束任务迟到的进度事件
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && inputs.draft || false }}
           prerelease: false
           retryAttempts: 1
