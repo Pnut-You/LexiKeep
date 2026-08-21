@@ -1,12 +1,12 @@
 :root {
   color-scheme: light;
-  --bg: #faf8fd;
-  --surface: rgba(253,251,255,.82);
-  --card: rgba(255,253,255,.86);
+  --bg: #ffffff;
+  --surface: rgba(255,255,255,.9);
+  --card: rgba(255,255,255,.94);
   --surface-solid: #ffffff;
   --surface-muted: #f2eef7;
   --surface-2: #f8f5fb;
-  --surface-sunken: #fbf9fd;
+  --surface-sunken: #fdfcfe;
   --text: #211a2d;
   --body: #4c4358;
   --muted: #746a80;
@@ -34,8 +34,8 @@
   --teal-50: #f0fdfa;
   --teal-600: #0f766e;
   --orange-600: #c2410c;
-  --glow: rgba(146,112,195,.15);
-  --bg-grad: linear-gradient(180deg, #fff 0%, var(--bg) 28%, #fdfbff 100%);
+  --glow: rgba(146,112,195,.07);
+  --bg-grad: #ffffff;
   --shadow: 0 24px 70px rgba(48, 34, 66, .11);
   --shadow-sm: 0 10px 30px rgba(48, 34, 66, .07);
   --radius: 22px;
