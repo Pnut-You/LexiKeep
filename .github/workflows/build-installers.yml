@@ -63,7 +63,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.7
+            ## LexiKeep v1.1.8
+
+            - 单词页全选现在覆盖当前筛选和搜索结果的全部分页
+            - 支持批量或右键将单词从个人列表删除
+            - 删除个人单词不会删除文件解析位置或词典数据
 
             - 修复阅读页无法从下拉列表选择文件夹内文件的问题
             - 阅读页中带下划线的词组现在支持右键快速修改状态
@@ -108,7 +112,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.7
+            ## LexiKeep v1.1.8
+
+            - 单词页全选现在覆盖当前筛选和搜索结果的全部分页
+            - 支持批量或右键将单词从个人列表删除
+            - 删除个人单词不会删除文件解析位置或词典数据
 
             - 修复阅读页无法从下拉列表选择文件夹内文件的问题
             - 阅读页中带下划线的词组现在支持右键快速修改状态
@@ -158,7 +166,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.7
+            ## LexiKeep v1.1.8
+
+            - 单词页全选现在覆盖当前筛选和搜索结果的全部分页
+            - 支持批量或右键将单词从个人列表删除
+            - 删除个人单词不会删除文件解析位置或词典数据
 
             - 修复阅读页无法从下拉列表选择文件夹内文件的问题
             - 阅读页中带下划线的词组现在支持右键快速修改状态
@@ -209,7 +221,11 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'LexiKeep v__VERSION__'
           releaseBody: |
-            ## LexiKeep v1.1.7
+            ## LexiKeep v1.1.8
+
+            - 单词页全选现在覆盖当前筛选和搜索结果的全部分页
+            - 支持批量或右键将单词从个人列表删除
+            - 删除个人单词不会删除文件解析位置或词典数据
 
             - 修复阅读页无法从下拉列表选择文件夹内文件的问题
             - 阅读页中带下划线的词组现在支持右键快速修改状态

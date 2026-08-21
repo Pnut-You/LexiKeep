@@ -30,6 +30,7 @@ interface WordStore {
   updateStatus: (wordId: number, status: WordStatus) => Promise<void>;
   updateDefinition: (wordId: number, definition: string) => Promise<void>;
   batchUpdateStatus: (status: WordStatus) => Promise<number>;
+  removeWords: (ids: number[]) => Promise<number>;
   undoBatchUpdate: () => Promise<void>;
   toggleSelected: (id: number) => void;
   selectAll: (ids?: number[]) => void;
@@ -149,6 +150,28 @@ export const useWordStore = create<WordStore>((set, get) => ({
         lastBatchAction: { changes, removed: result.removed },
       });
       return changes.length;
+    } finally {
+      set({ batchUpdating: false });
+    }
+  },
+
+  removeWords: async (ids) => {
+    if (ids.length === 0) return 0;
+    set({ batchUpdating: true });
+    try {
+      const removed = await invoke<number>('remove_words_from_list', { wordIds: ids });
+      const removedIds = new Set(ids);
+      const detail = get().detail;
+      set({
+        words: get().words.filter((word) => !removedIds.has(word.id)),
+        selected: new Set(Array.from(get().selected).filter((id) => !removedIds.has(id))),
+        detail: detail && removedIds.has(detail.word.id) ? null : detail,
+        detailError: false,
+        detailErrorId: null,
+        lastBatchAction: null,
+        refreshKey: get().refreshKey + 1,
+      });
+      return removed;
     } finally {
       set({ batchUpdating: false });
     }

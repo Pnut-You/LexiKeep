@@ -37,6 +37,7 @@
     "cancelled": "Vorgang abgebrochen",
     "statusUpdateFailed": "Status konnte nicht aktualisiert werden. Bitte erneut versuchen.",
     "batchUpdateFailed": "Stapelaktualisierung fehlgeschlagen. Bitte erneut versuchen.",
+    "wordRemoveFailed": "Wörter konnten nicht aus Ihrer persönlichen Liste entfernt werden. Bitte erneut versuchen.",
     "undoFailed": "Rückgängig machen fehlgeschlagen. Bitte erneut versuchen.",
     "needAiSetup": "Bitte aktivieren und konfigurieren Sie die KI-Funktion zuerst in den Einstellungen",
     "detailLoadFailed": "Details konnten nicht geladen werden. Bitte erneut versuchen."
@@ -233,6 +234,9 @@
     "selectAllAria": "Alle aktuellen Ergebnisse auswählen",
     "currentResults": "{{count}} Ergebnisse",
     "selectedCount": "{{count}} ausgewählt",
+    "removeFromList": "Aus persönlicher Liste entfernen",
+    "removeConfirm": "Die ausgewählten {{count}} Wörter aus Ihrer persönlichen Liste entfernen? Analysierte Dateivorkommen und Wörterbuchdaten bleiben erhalten.",
+    "removed": "{{count}} Wörter aus Ihrer persönlichen Liste entfernt",
     "updated_one": "{{count}} Wort aktualisiert",
     "updated_other": "{{count}} Wörter aktualisiert",
     "undone": "Letzter Stapelvorgang rückgängig gemacht"

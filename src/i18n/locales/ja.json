@@ -37,6 +37,7 @@
     "cancelled": "操作はキャンセルされました",
     "statusUpdateFailed": "ステータスの更新に失敗しました。もう一度お試しください。",
     "batchUpdateFailed": "一括更新に失敗しました。もう一度お試しください。",
+    "wordRemoveFailed": "個人単語リストからの削除に失敗しました。もう一度お試しください。",
     "undoFailed": "元に戻せませんでした。もう一度お試しください。",
     "needAiSetup": "先に設定で AI 機能を有効にして設定してください",
     "detailLoadFailed": "詳細の読み込みに失敗しました。もう一度お試しください。"
@@ -227,6 +228,9 @@
     "selectAllAria": "現在の結果をすべて選択",
     "currentResults": "現在の結果 {{count}} 件",
     "selectedCount": "{{count}} 件を選択中",
+    "removeFromList": "個人リストから削除",
+    "removeConfirm": "選択した {{count}} 個の単語を個人リストから削除しますか？ファイルの解析結果と辞書データは保持されます。",
+    "removed": "{{count}} 個の単語を個人リストから削除しました",
     "updated": "{{count}} 個の単語を更新しました",
     "undone": "最後の一括操作を元に戻しました"
   },

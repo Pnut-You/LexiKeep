@@ -90,6 +90,8 @@ const WORDS_NEW_DDL: &str = "CREATE TABLE words_new (
             lemma TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'unprocessed'
                 CHECK(status IN ('unprocessed','learning','known','ignored')),
+            in_personal_list INTEGER NOT NULL DEFAULT 1
+                CHECK(in_personal_list IN (0, 1)),
             definition TEXT,
             reading TEXT,
             part_of_speech TEXT,
@@ -218,7 +220,7 @@ fn backfill_phrase_provider(conn: &Connection) -> Result<(), rusqlite::Error> {
     Ok(())
 }
 
-fn create_tables(conn: &Connection) -> Result<(), rusqlite::Error> {
+pub(crate) fn create_tables(conn: &Connection) -> Result<(), rusqlite::Error> {
     conn.execute_batch(
         "
         CREATE TABLE IF NOT EXISTS files (
@@ -255,6 +257,8 @@ fn create_tables(conn: &Connection) -> Result<(), rusqlite::Error> {
              lemma TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'unprocessed'
                 CHECK(status IN ('unprocessed','learning','known','ignored')),
+             in_personal_list INTEGER NOT NULL DEFAULT 1
+                CHECK(in_personal_list IN (0, 1)),
              definition TEXT,
              reading TEXT,
              part_of_speech TEXT,
@@ -446,6 +450,10 @@ fn create_tables(conn: &Connection) -> Result<(), rusqlite::Error> {
     );
     let _ = conn.execute("ALTER TABLE words ADD COLUMN reading TEXT", []);
     let _ = conn.execute("ALTER TABLE words ADD COLUMN part_of_speech TEXT", []);
+    let _ = conn.execute(
+        "ALTER TABLE words ADD COLUMN in_personal_list INTEGER NOT NULL DEFAULT 1 CHECK(in_personal_list IN (0, 1))",
+        [],
+    );
     let _ = conn.execute(
         "ALTER TABLE dictionary_entries ADD COLUMN language TEXT NOT NULL DEFAULT 'en'",
         [],

@@ -88,6 +88,7 @@ pub fn run() {
             commands::words::update_word_status,
             commands::words::update_word_definition,
             commands::words::batch_update_status,
+            commands::words::remove_words_from_list,
             commands::words::list_file_word_tokens,
             commands::words::get_file_segment_tokens,
             commands::phrases::list_phrases,

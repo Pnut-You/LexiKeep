@@ -81,21 +81,30 @@ pub fn get_learning_stats(state: State<DbState>) -> Result<LearningStats, String
     let day_ms = 86_400_000_i64;
     let day_start = now / day_ms * day_ms;
 
-    let total_words = count_query(&conn, "SELECT COUNT(*) FROM words")?;
+    let total_words = count_query(
+        &conn,
+        "SELECT COUNT(*) FROM words WHERE in_personal_list = 1",
+    )?;
     let unprocessed = count_query(
         &conn,
-        "SELECT COUNT(*) FROM words WHERE status = 'unprocessed'",
+        "SELECT COUNT(*) FROM words WHERE in_personal_list = 1 AND status = 'unprocessed'",
     )?;
     let learning = count_query(
         &conn,
-        "SELECT COUNT(*) FROM words WHERE status = 'learning'",
+        "SELECT COUNT(*) FROM words WHERE in_personal_list = 1 AND status = 'learning'",
     )?;
-    let known = count_query(&conn, "SELECT COUNT(*) FROM words WHERE status = 'known'")?;
-    let ignored = count_query(&conn, "SELECT COUNT(*) FROM words WHERE status = 'ignored'")?;
+    let known = count_query(
+        &conn,
+        "SELECT COUNT(*) FROM words WHERE in_personal_list = 1 AND status = 'known'",
+    )?;
+    let ignored = count_query(
+        &conn,
+        "SELECT COUNT(*) FROM words WHERE in_personal_list = 1 AND status = 'ignored'",
+    )?;
     let due_cards = conn
         .query_row(
             "SELECT COUNT(*) FROM reviews r JOIN words w ON w.id = r.word_id
-             WHERE w.status = 'learning' AND r.due_at <= ?1",
+             WHERE w.in_personal_list = 1 AND w.status = 'learning' AND r.due_at <= ?1",
             [now],
             |row| row.get(0),
         )
@@ -153,11 +162,11 @@ pub fn get_learning_stats(state: State<DbState>) -> Result<LearningStats, String
     let mut stmt = conn
         .prepare(
             "SELECT f.id, f.name, f.language,
-                    COUNT(DISTINCT o.word_id),
-                    COUNT(DISTINCT CASE WHEN w.status = 'unprocessed' THEN o.word_id END),
-                    COUNT(DISTINCT CASE WHEN w.status = 'learning' THEN o.word_id END),
-                    COUNT(DISTINCT CASE WHEN w.status = 'known' THEN o.word_id END),
-                    COUNT(DISTINCT CASE WHEN w.status = 'ignored' THEN o.word_id END)
+                    COUNT(DISTINCT CASE WHEN w.in_personal_list = 1 THEN o.word_id END),
+                    COUNT(DISTINCT CASE WHEN w.in_personal_list = 1 AND w.status = 'unprocessed' THEN o.word_id END),
+                    COUNT(DISTINCT CASE WHEN w.in_personal_list = 1 AND w.status = 'learning' THEN o.word_id END),
+                    COUNT(DISTINCT CASE WHEN w.in_personal_list = 1 AND w.status = 'known' THEN o.word_id END),
+                    COUNT(DISTINCT CASE WHEN w.in_personal_list = 1 AND w.status = 'ignored' THEN o.word_id END)
              FROM files f
              LEFT JOIN segments s ON s.file_id = f.id
              LEFT JOIN occurrences o ON o.segment_id = s.id

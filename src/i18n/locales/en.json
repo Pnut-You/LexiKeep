@@ -37,6 +37,7 @@
     "cancelled": "Operation cancelled",
     "statusUpdateFailed": "Failed to update status. Please try again.",
     "batchUpdateFailed": "Batch update failed. Please try again.",
+    "wordRemoveFailed": "Failed to remove words from your personal list. Please try again.",
     "undoFailed": "Undo failed. Please try again.",
     "needAiSetup": "Please enable and configure the AI feature in Settings first",
     "detailLoadFailed": "Failed to load details. Please retry."
@@ -233,6 +234,9 @@
     "selectAllAria": "Select all current results",
     "currentResults": "{{count}} results",
     "selectedCount": "{{count}} selected",
+    "removeFromList": "Remove from my list",
+    "removeConfirm": "Remove the selected {{count}} word(s) from your personal list? Parsed file occurrences and dictionary data will be kept.",
+    "removed": "Removed {{count}} word(s) from your personal list",
     "updated_one": "Updated {{count}} word",
     "updated_other": "Updated {{count}} words",
     "undone": "Last batch operation undone"

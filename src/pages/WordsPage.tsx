@@ -58,12 +58,23 @@ export default function WordsPage() {
     status: WordStatus;
   } | null>(null);
 
+  const removeWords = async (ids: number[]) => {
+    if (ids.length === 0 || !window.confirm(t('words.removeConfirm', { count: ids.length }))) return;
+    try {
+      const count = await store.removeWords(ids);
+      useFeedbackStore.getState().show(t('words.removed', { count }), 'success', 1800);
+    } catch (e) {
+      console.error('Failed to remove words from personal list:', e);
+      useFeedbackStore.getState().show(t('errors.wordRemoveFailed'), 'error');
+    }
+  };
+
   useEffect(() => {
     void loadWords();
   }, [loadWords]);
 
   const getContextItems = (wordId: number, status: WordStatus): ContextMenuItem[] => {
-    return STATUS_CYCLE.map(s => ({
+    return [...STATUS_CYCLE.map(s => ({
       label: t(`status.${s}`),
       status: s,
       active: s === status,
@@ -76,7 +87,11 @@ export default function WordsPage() {
           useFeedbackStore.getState().show(t('errors.statusUpdateFailed'), 'error');
         }
       },
-    }));
+    })), {
+      label: t('words.removeFromList'),
+      danger: true,
+      onClick: () => { void removeWords([wordId]); },
+    }];
   };
 
   const visibleWords = words.filter((word) =>
@@ -88,8 +103,8 @@ export default function WordsPage() {
     () => (pageIds ? pageIds.map((id) => wordById.get(id)).filter((w): w is WordInfo => !!w) : []),
     [pageIds, wordById],
   );
-  const allVisibleSelected = pageWords.length > 0 && pageWords.every((word) => selected.has(word.id));
-  const someVisibleSelected = pageWords.some((word) => selected.has(word.id));
+  const allVisibleSelected = visibleWords.length > 0 && visibleWords.every((word) => selected.has(word.id));
+  const someVisibleSelected = visibleWords.some((word) => selected.has(word.id));
 
   useEffect(() => {
     const all = useWordStore.getState().words;
@@ -148,7 +163,7 @@ export default function WordsPage() {
 
       if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
         e.preventDefault();
-        store.selectAll(pageWords.map((word) => word.id));
+        store.selectAll(visibleWords.map((word) => word.id));
         return;
       }
 
@@ -169,7 +184,7 @@ export default function WordsPage() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [selected, store, pageWords]);
+  }, [selected, store, visibleWords]);
 
   return (
     <div className="h-full flex flex-col relative">
@@ -244,6 +259,15 @@ export default function WordsPage() {
           ))}
           {selected.size > 0 && (
             <button
+              onClick={() => { void removeWords(Array.from(selected)); }}
+              disabled={batchUpdating}
+              className="px-2.5 py-1 rounded text-xs font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-40"
+            >
+              {t('words.removeFromList')}
+            </button>
+          )}
+          {selected.size > 0 && (
+            <button
               onClick={store.clearSelection}
               disabled={batchUpdating}
               className="px-3 py-1 rounded text-xs font-medium text-gray-500 hover:text-gray-700"
@@ -292,7 +316,7 @@ export default function WordsPage() {
                 checked={allVisibleSelected}
                 onChange={() => allVisibleSelected
                   ? store.clearSelection()
-                  : store.selectAll(pageWords.map((word) => word.id))}
+                  : store.selectAll(visibleWords.map((word) => word.id))}
                 aria-label={t('words.selectAllAria')}
                 className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />

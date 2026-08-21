@@ -37,6 +37,7 @@
     "cancelled": "操作已取消",
     "statusUpdateFailed": "状态更新失败，请重试",
     "batchUpdateFailed": "批量更新失败，请重试",
+    "wordRemoveFailed": "从个人单词列表删除失败，请重试",
     "undoFailed": "撤销失败，请重试",
     "needAiSetup": "请先在设置中开启并配置 AI 功能",
     "detailLoadFailed": "详情加载失败，请重试"
@@ -227,6 +228,9 @@
     "selectAllAria": "全选当前结果",
     "currentResults": "当前结果 {{count}} 个",
     "selectedCount": "已选 {{count}} 个",
+    "removeFromList": "从个人列表删除",
+    "removeConfirm": "确定从个人单词列表删除选中的 {{count}} 个单词吗？文件中的解析结果和词典数据都会保留。",
+    "removed": "已从个人列表删除 {{count}} 个单词",
     "updated": "已更新 {{count}} 个单词",
     "undone": "已撤销上次批量操作"
   },

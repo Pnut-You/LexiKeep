@@ -127,7 +127,8 @@ fn query_words(
                          w.language, w.reading, w.part_of_speech
                  FROM words w
                  LEFT JOIN occurrences o ON o.word_id = w.id
-                 WHERE w.status = ?1 AND (?2 IS NULL OR w.language = ?2)
+                 WHERE w.in_personal_list = 1
+                   AND w.status = ?1 AND (?2 IS NULL OR w.language = ?2)
                  GROUP BY w.id
                  ORDER BY {}",
                 order_clause
@@ -155,7 +156,8 @@ fn query_words(
                          w.language, w.reading, w.part_of_speech
                  FROM words w
                  LEFT JOIN occurrences o ON o.word_id = w.id
-                 WHERE (?1 IS NULL OR w.language = ?1)
+                 WHERE w.in_personal_list = 1
+                   AND (?1 IS NULL OR w.language = ?1)
                  GROUP BY w.id
                  ORDER BY {}",
                 order_clause
@@ -286,7 +288,7 @@ pub fn update_word_status(
     }
 
     conn.execute(
-        "UPDATE words SET status = ?1 WHERE id = ?2",
+        "UPDATE words SET status = ?1, in_personal_list = 1 WHERE id = ?2",
         params![status, word_id],
     )
     .map_err(|e| e.to_string())?;
@@ -329,11 +331,113 @@ pub fn batch_update_status(
 
     for id in &word_ids {
         conn.execute(
-            "UPDATE words SET status = ?1 WHERE id = ?2",
+            "UPDATE words SET status = ?1, in_personal_list = 1 WHERE id = ?2",
             params![status, id],
         )
         .map_err(|e| e.to_string())?;
     }
 
     Ok(())
+}
+
+fn remove_words_from_personal_list(
+    conn: &mut rusqlite::Connection,
+    word_ids: &[i64],
+) -> Result<usize, rusqlite::Error> {
+    if word_ids.is_empty() {
+        return Ok(0);
+    }
+
+    let tx = conn.transaction()?;
+    let mut removed = 0;
+    for id in word_ids {
+        tx.execute("DELETE FROM review_logs WHERE word_id = ?1", [id])?;
+        tx.execute("DELETE FROM reviews WHERE word_id = ?1", [id])?;
+        removed += tx.execute(
+            "UPDATE words
+             SET in_personal_list = 0, status = 'unprocessed'
+             WHERE id = ?1 AND in_personal_list = 1",
+            [id],
+        )?;
+    }
+    tx.commit()?;
+    Ok(removed)
+}
+
+/// Removes words from the user's managed word list without deleting the
+/// parsed word records, their file occurrences, or any dictionary entries.
+#[tauri::command]
+pub fn remove_words_from_list(
+    state: State<DbState>,
+    word_ids: Vec<i64>,
+) -> Result<usize, String> {
+    let mut conn = state.conn.lock().map_err(|e| e.to_string())?;
+    remove_words_from_personal_list(&mut conn, &word_ids).map_err(|e| e.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn removing_a_word_keeps_occurrences_and_dictionaries() {
+        let mut conn = rusqlite::Connection::open_in_memory().unwrap();
+        crate::db::create_tables(&conn).unwrap();
+        conn.execute(
+            "INSERT INTO files (id, name, type, content, content_hash, imported_at)
+             VALUES (1, 'sample.txt', 'txt', 'hello', 'hash', 0)",
+            [],
+        )
+        .unwrap();
+        conn.execute(
+            "INSERT INTO segments (id, file_id, index_num, en_text) VALUES (1, 1, 0, 'hello')",
+            [],
+        )
+        .unwrap();
+        conn.execute("INSERT INTO words (id, lemma, status) VALUES (1, 'hello', 'learning')", [])
+            .unwrap();
+        conn.execute(
+            "INSERT INTO occurrences (word_id, segment_id, original_form, position)
+             VALUES (1, 1, 'hello', 0)",
+            [],
+        )
+        .unwrap();
+        conn.execute("INSERT INTO reviews (word_id, due_at) VALUES (1, 0)", [])
+            .unwrap();
+        conn.execute(
+            "INSERT INTO dictionary_entries
+             (language, lemma, provider, definitions_json, fetched_at)
+             VALUES ('en', 'hello', 'test', '[]', 0)",
+            [],
+        )
+        .unwrap();
+
+        assert_eq!(remove_words_from_personal_list(&mut conn, &[1]).unwrap(), 1);
+
+        let word: (i64, String) = conn
+            .query_row(
+                "SELECT in_personal_list, status FROM words WHERE id = 1",
+                [],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .unwrap();
+        assert_eq!(word, (0, "unprocessed".to_string()));
+        assert_eq!(conn.query_row("SELECT COUNT(*) FROM occurrences", [], |r| r.get::<_, i64>(0)).unwrap(), 1);
+        assert_eq!(conn.query_row("SELECT COUNT(*) FROM dictionary_entries", [], |r| r.get::<_, i64>(0)).unwrap(), 1);
+        assert_eq!(conn.query_row("SELECT COUNT(*) FROM reviews", [], |r| r.get::<_, i64>(0)).unwrap(), 0);
+
+        let listed = query_words(&conn, None, None, None).unwrap();
+        assert!(listed.is_empty());
+    }
+
+    #[test]
+    fn removing_words_is_idempotent() {
+        let mut conn = rusqlite::Connection::open_in_memory().unwrap();
+        crate::db::create_tables(&conn).unwrap();
+        conn.execute("INSERT INTO words (id, lemma) VALUES (1, 'hello')", [])
+            .unwrap();
+
+        assert_eq!(remove_words_from_personal_list(&mut conn, &[1, 1]).unwrap(), 1);
+        assert_eq!(remove_words_from_personal_list(&mut conn, &[1]).unwrap(), 0);
+    }
 }
